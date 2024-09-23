@@ -11,4 +11,4 @@ cfn-json-schemas
 src/types/cfn-resource-types
 test/unit/tmp
 dist
-lib/types/cfn-resource-types
+lib/types

@@ -8,6 +8,7 @@ import {
   aws_codepipeline as codepipeline,
   aws_codepipeline_actions as pipelineActions,
   aws_logs as logs, 
+  aws_iam as iam,
 } from "aws-cdk-lib"
 import { Construct } from 'constructs';
 const app = new cdk.App();
@@ -55,6 +56,14 @@ export class CICDStack extends cdk.Stack {
       },
       
     })
+    buildProject.addToRolePolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: [
+        "ssm:GetParameters",
+        "kms:Decrypt"
+      ],
+      resources: ["*"]
+    }))
 
     const pipeline = new codepipeline.Pipeline(this, "Pipeline", {
       pipelineType: codepipeline.PipelineType.V2,
