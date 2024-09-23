@@ -147,7 +147,13 @@ export class CICDStack extends cdk.Stack {
             input: codepipeline.Artifact.artifact("SecondarySourceArtifact"),
             project: e2eProject,
             type: pipelineActions.CodeBuildActionType.TEST,
-            variablesNamespace: "E2EVariables"
+            variablesNamespace: "E2EVariables",
+            environmentVariables: {
+              PACKAGE_NAME: {
+                value: "#{BuildVariables.PACKAGE_NAME}",
+                type: codebuild.BuildEnvironmentVariableType.PLAINTEXT
+              }
+            }
           })
         ]
        }
