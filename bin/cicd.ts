@@ -9,6 +9,8 @@ import {
   aws_codepipeline_actions as pipelineActions,
   aws_logs as logs, 
   aws_iam as iam,
+  aws_codestarnotifications as codestarnotification,
+  aws_sns as sns
 } from "aws-cdk-lib"
 import { Construct } from 'constructs';
 const app = new cdk.App();
@@ -159,7 +161,29 @@ export class CICDStack extends cdk.Stack {
        }
       ]
     })
+    const topic = new sns.Topic(this, "Topic", {
+      fifo: false,
+    })
+    topic.addToResourcePolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      principals: [new iam.ServicePrincipal("codestar-notifications.amazonaws.com")],
+      actions: ["SNS:Publish"],
+      resources: [topic.topicArn]
+    }))
+    const notificationRule = new codestarnotification.NotificationRule(this, "Notify", {
+      events: [
+        "codepipeline-pipeline-pipeline-execution-failed",
+        "codepipeline-pipeline-pipeline-execution-succeeded"
+      ],
+      source: pipeline,
+      enabled: true,
+      detailType: codestarnotification.DetailType.BASIC,
+    })
+    notificationRule.addTarget(topic)
+
+
   }
+
   
 }
 
