@@ -9,7 +9,6 @@ cdk.out
 bin
 cfn-json-schemas
 test
-lib
 scripts
 .evn
 cdk.json

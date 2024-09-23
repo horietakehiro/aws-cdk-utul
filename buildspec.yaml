@@ -22,6 +22,7 @@ phases:
     commands:
       - npm ci
       - npm install -g ts-node
+      - echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
     
   build:
     on-failure: ABORT
