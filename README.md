@@ -6,7 +6,7 @@
    </a>
 </p>
 
-**aws-cdk-utul(unit test utility library) makes it faster, more efficient, and less mistaken for you to code AWS CDK unit tests.**
+**aws-cdk-utul(unit test utility library) makes it faster, more efficient with less mistakes for you to code AWS CDK unit tests.**
 
 ---
 
@@ -16,16 +16,15 @@
 
 ### TypedTemplate
 
-When you code AWS CDK unit tests in some IDE(e.g. VSCode), `TypedTemplate` class provides you a type hinting and type validation for (alomost) all AWS CloudFormation resource types.
+`TypedTemplate` class provides you proper type definitions for (almost) all AWS CloudFormation resource types. So you can easily and quickly code AWS CDK unit tests without trivial mistakes and googling.
 
 ![type-hinting-1](./docs/type-hinting-1.png)
 
-The key concepts are:
-- You can define unit tests for your AWS CloudFormation templates by using well-type-defined methods via `TypedTemplate` class - a proxy for original `Template` class.
-- Returned values from methods of `TypedTemplate` are also well-type-defined.
-- You can still use `Matcher` and other arbitrary objects too.
+- You can use by just wrapping AWS CDK's `Template` class.
+- You can use all methods implemented by AWS CDK's `Template` class with proper type definitions.
+- Return values of some methods - e.g. `findResources` - are changed from original ones, so that succeeding processes can handle and access them more easily.
+- You can still use AWS CDK's `Matcher` class and other arbitrary objects too.
 
-So you can quickly code AWS CDK unit tests without any trivial mistakes and googling.
 ```js
 import { Stack } from "aws-cdk-lib";
 import { Template } from "aws-cdk-lib/assertions";
@@ -56,7 +55,7 @@ subnets.forEach((sn) => {
 
 ### ExtraMatch
 
-`ExtraMatch` class provides you some kind of a syntax sugar for original `Match` class.
+`ExtraMatch` class provides you some kind of a syntax sugar for AWS CDK's `Match` class.
 
 ```js
 import { ExtraMatch } from "@horietakehiro/aws-cdk-utul/lib/assertions"
