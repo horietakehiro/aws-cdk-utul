@@ -23,6 +23,7 @@
     // "emitDeclarationOnly": true,
     "typeRoots": [
       "./node_modules/@types",
+      "./lib/types"
     ],
     // "outDir": "./dist"
   },

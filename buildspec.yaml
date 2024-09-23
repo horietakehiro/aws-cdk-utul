@@ -29,6 +29,7 @@ phases:
       - npm test -- --roots test/unit
       - npm test -- --roots test/functional
       - ts-node scripts/generate-cfn-ts-codes/main.ts
+      - npm run build
       - npm test -- --roots test/e2e
 
   post_build:
