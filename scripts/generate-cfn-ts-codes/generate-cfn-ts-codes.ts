@@ -203,8 +203,8 @@ export const main = async (region:string, url:string) => {
   try {
     const ds = new DirectoryStructure(
       path.join(__dirname, "..", "..", "cfn-json-schemas"),
-      path.join(__dirname, "..", "..", "src", "types", "cfn-resource-types"),
-      path.join(__dirname, "..", "..", "src", "types", "cfn-resource-types.ts")
+      path.join(__dirname, "..", "..", "lib", "types", "cfn-resource-types"),
+      path.join(__dirname, "..", "..", "lib", "types", "cfn-resource-types.ts")
     )
     ds.refresh()
 

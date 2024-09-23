@@ -3,8 +3,8 @@ import * as fs from "fs"
 import { main } from "../../scripts/generate-cfn-ts-codes/generate-cfn-ts-codes"
 beforeEach(() => {})
 
-const tsDir = path.join(__dirname, "..", "..", "src", "types", "cfn-resource-types")
-const tsFile = path.join(__dirname, "..", "..", "src", "types", "cfn-resource-types.ts")
+const tsDir = path.join(__dirname, "..", "..", "lib", "types", "cfn-resource-types")
+const tsFile = path.join(__dirname, "..", "..", "lib", "types", "cfn-resource-types.ts")
 const url = "https://public-artifact-bucket-382098889955-ap-northeast-1.s3.ap-northeast-1.amazonaws.com/test-files/test-cfn-json-schemas.zip"
 const region = "test-region"
 
