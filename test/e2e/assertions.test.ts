@@ -8,7 +8,6 @@ const app = new App()
 const stackProps:TestStackProps = {cidr: "10.0.0.0/16"}
 const stack = new TestStack(app, "TestStack", stackProps)
 const template = new TypedTemplate(Template.fromStack(stack))
-
 describe("TypedTemplate", () => {
   test("resourceCountIs", () => {
     template.resourceCountIs(AWS_EC2_SUBNET({}), 2)
