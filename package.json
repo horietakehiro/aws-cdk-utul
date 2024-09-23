@@ -1,7 +1,7 @@
 {
   "name": "@horietakehiro/aws-cdk-utul",
   "license": "MIT",
-  "version": "0.10.0",
+  "version": "0.10.1",
   "repository": {
     "type": "git",
     "url": "https://github.com/horietakehiro/aws-cdk-utul"
@@ -27,11 +27,11 @@
     "decompress": "^4.2.1",
     "https-proxy-agent": "^7.0.5",
     "json-schema-to-typescript": "^15.0.2",
-    "node-fetch": "^2.7.0",
-    "source-map-support": "^0.5.21"
+    "node-fetch": "^2.7.0"
   },
   "dependencies": {
     "aws-cdk-lib": "2.X.0",
-    "constructs": "^10.0.0"
+    "constructs": "^10.0.0",
+    "source-map-support": "^0.5.21"
   }
 }
