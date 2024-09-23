@@ -2,7 +2,7 @@ import { App } from "aws-cdk-lib"
 import { TestStack, TestStackProps } from "./test-stack"
 import { ExtraMatch, TypedTemplate } from "../../lib/assertions"
 import { Match, Template } from "aws-cdk-lib/assertions"
-import { AWS_EC2_VPC, AWS_EC2_SUBNET, AWS_EC2_INSTANCE, AWS_EC2_EIP, AWS_IAM_ROLE } from "../../lib/types/cfn-resource-types"
+import { AWS_EC2_VPC, AWS_EC2_SUBNET, AWS_EC2_INSTANCE, AWS_EC2_EIP, AWS_IAM_ROLE } from "./../../lib/types/cfn-resource-types"
 
 const app = new App()
 const stackProps:TestStackProps = {cidr: "10.0.0.0/16"}

@@ -23,13 +23,12 @@
     // "emitDeclarationOnly": true,
     "typeRoots": [
       "./node_modules/@types",
-      // "./src/types",
     ],
     // "outDir": "./dist"
   },
   "include": [
-    "./src",
-    "./index.ts"
+    "./lib",
+    "./index.ts",
   ],
   "exclude": [
     "node_modules",
