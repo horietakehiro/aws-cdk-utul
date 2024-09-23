@@ -1,0 +1,14 @@
+*.js
+!jest.config.js
+*.d.ts
+node_modules
+
+# CDK asset staging directory
+.cdk.staging
+cdk.out
+cfn-json-schemas
+
+src/types/cfn-resource-types
+test/unit/tmp
+dist
+lib/types/cfn-resource-types
