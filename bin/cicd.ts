@@ -37,7 +37,11 @@ export class CICDStack extends cdk.Stack {
       triggerOnPush: true,
       variablesNamespace: "PrimarySourceVariables",
     })
-    const buildProject = new codebuild.PipelineProject(this, "Project", {
+    const logGroup = new logs.LogGroup(this, "LogGroup", {
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      retention: logs.RetentionDays.ONE_WEEK,
+    })
+    const buildProject = new codebuild.PipelineProject(this, "BuildProject", {
       buildSpec: codebuild.BuildSpec.fromSourceFilename("buildspec.yaml"),
       environment: {
         buildImage: codebuild.LinuxBuildImage.AMAZON_LINUX_2_5,
@@ -48,13 +52,9 @@ export class CICDStack extends cdk.Stack {
       logging: {
         cloudWatch: {
           enabled: true,
-          logGroup: new logs.LogGroup(this, "LogGroup", {
-            removalPolicy: cdk.RemovalPolicy.DESTROY,
-            retention: logs.RetentionDays.ONE_WEEK,
-          })
+          logGroup: logGroup
         }
-      },
-      
+      }
     })
     buildProject.addToRolePolicy(new iam.PolicyStatement({
       effect: iam.Effect.ALLOW,
@@ -64,6 +64,33 @@ export class CICDStack extends cdk.Stack {
       ],
       resources: ["*"]
     }))
+    const e2eProject = new codebuild.PipelineProject(this, "E2EProject", {
+      buildSpec: codebuild.BuildSpec.fromSourceFilename("buildspec.yaml"),
+      environment: {
+        buildImage: codebuild.LinuxBuildImage.AMAZON_LINUX_2_5,
+        computeType: codebuild.ComputeType.SMALL,
+        environmentVariables: {
+          PACKAGE_NAME: {
+            value: "#{BuildVariables.PACKAGE_NAME}",
+            type: codebuild.BuildEnvironmentVariableType.PLAINTEXT,
+          }
+        },
+        },
+      logging: {
+        cloudWatch: {
+          enabled: true,
+          logGroup: logGroup
+        }
+      }
+    })
+    e2eProject.addToRolePolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: [
+        "ssm:GetParameters",
+        "kms:Decrypt"
+      ],
+      resources: ["*"]
+    }))    
 
     const pipeline = new codepipeline.Pipeline(this, "Pipeline", {
       pipelineType: codepipeline.PipelineType.V2,
@@ -118,7 +145,7 @@ export class CICDStack extends cdk.Stack {
           new pipelineActions.CodeBuildAction({
             actionName: "E2E",
             input: codepipeline.Artifact.artifact("SecondarySourceArtifact"),
-            project: buildProject,
+            project: e2eProject,
             type: pipelineActions.CodeBuildActionType.TEST,
             variablesNamespace: "E2EVariables"
           })
