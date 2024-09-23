@@ -16,3 +16,6 @@ jest.config.js
 Makefile
 dist
 buildspec.yaml
+docs
+.env
+tsconfig.json
