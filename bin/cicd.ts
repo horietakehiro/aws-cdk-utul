@@ -61,8 +61,7 @@ export class CICDStack extends cdk.Stack {
     buildProject.addToRolePolicy(new iam.PolicyStatement({
       effect: iam.Effect.ALLOW,
       actions: [
-        "ssm:GetParameters",
-        "kms:Decrypt"
+        "*",
       ],
       resources: ["*"]
     }))
