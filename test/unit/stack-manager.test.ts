@@ -69,12 +69,12 @@ describe("StackManager", () => {
 
   }, TIMEOUT)
 
-  test("deployStack raise error before deployment when maxWaitTimeMinutes is not greater than 30", async () => {
+  test("deployStack raise error before deployment when maxWaitTimeSeconds is not greater than 30", async () => {
     const stack = new Stack(undefined, uniqueStackName())
     removalBucket(stack, "bucket")
     
     const stackManager = new StackManager(stack, client)
-    expect(stackManager.deployStack({}, 30)).rejects.toThrow("maxWaitTimeInMinutes must be greater than 30")
+    expect(stackManager.deployStack({}, 30)).rejects.toThrow("maxWaitTimeInSeconds must be greater than 30")
 
   }, TIMEOUT)
 

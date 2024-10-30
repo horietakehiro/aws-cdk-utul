@@ -77,18 +77,18 @@ export class StackManager {
    *
    * This method waits until stack deployment gets completed.
    * @param deployStackInput
-   * @param maxWaitTimeInMinutes the default(and minimum) value is `31`
+   * @param maxWaitTimeInSeconds the default values is `60 * 60 = 1hour`. Allowed minimum value is `31 seconds`
    */
   async deployStack(
     deployStackInput: DeployStackInput,
-    maxWaitTimeInMinutes?: number
+    maxWaitTimeInSeconds?: number
   ) {
-    if (maxWaitTimeInMinutes === undefined) {
-      console.debug("set 31 minutes as maxWaitTimeInMinutes default value");
-      maxWaitTimeInMinutes = 31;
+    if (maxWaitTimeInSeconds === undefined) {
+      console.debug("set 1hour as maxWaitTimeInSeconds default value");
+      maxWaitTimeInSeconds = 60 * 60;
     }
-    if (maxWaitTimeInMinutes <= 30) {
-      throw  Error("maxWaitTimeInMinutes must be greater than 30")
+    if (maxWaitTimeInSeconds <= 30) {
+      throw  Error("maxWaitTimeInSeconds must be greater than 30")
     }
     console.debug(`check if stack ${this.stack.stackName} exists`);
     let existStacks: cfnStack[] = [];
@@ -122,7 +122,7 @@ export class StackManager {
         `wait until deploying of stack ${this.stack.stackName} completes`
       );
       await waitUntilStackCreateComplete(
-        { client: this.client, maxWaitTime: maxWaitTimeInMinutes },
+        { client: this.client, maxWaitTime: maxWaitTimeInSeconds },
         { StackName: this.stack.stackName }
       );
     } else {
@@ -139,7 +139,7 @@ export class StackManager {
           `wait until deploying of stack ${this.stack.stackName} completes`
         );
         await waitUntilStackUpdateComplete(
-          { client: this.client, maxWaitTime: maxWaitTimeInMinutes },
+          { client: this.client, maxWaitTime: maxWaitTimeInSeconds },
           { StackName: this.stack.stackName }
         );
       } catch (error) {
@@ -158,12 +158,12 @@ export class StackManager {
    * Destroy the stack
    * @param destroyStackInput
    * @param wait If `true`, this method waits until stack deletion complete. The default value is 'false'
-   * @param maxWaitTimeInMinutes the default(and minimum) value is `31`. used only when parameter `wait` is set to 'true'
+   * @param maxWaitTimeInSeconds the default value is `60 * 60 = 1hour`. Allowed minimum value is `31 seconds`. This param will be used only when parameter `wait` is set to 'true'
    */
   async destroyStack(
     destroyStackInput: DestroyStackInput,
     wait?: boolean,
-    maxWaitTimeInMinutes?: number
+    maxWaitTimeInSeconds?: number
   ): Promise<void> {
     console.debug(`destroy stack ${this.stack.stackName}`);
     await this.client.send(
@@ -178,14 +178,14 @@ export class StackManager {
     }
 
     console.debug("wait until stack deletion complets");
-    if (maxWaitTimeInMinutes === undefined) {
-      maxWaitTimeInMinutes = 31;
+    if (maxWaitTimeInSeconds === undefined) {
+      maxWaitTimeInSeconds = 60 * 60;
     }
-    if (maxWaitTimeInMinutes <= 30) {
-      throw  Error("maxWaitTimeInMinutes must be greater than 30")
+    if (maxWaitTimeInSeconds <= 30) {
+      throw  Error("maxWaitTimeInSeconds must be greater than 30")
     }
     await waitUntilStackDeleteComplete(
-      { client: this.client, maxWaitTime: maxWaitTimeInMinutes },
+      { client: this.client, maxWaitTime: maxWaitTimeInSeconds },
       { StackName: this.stack.stackName }
     );
     return;
