@@ -34,7 +34,7 @@ import { AWS_EC2_SUBNET, AWS_EC2_VPC } from "@horietakehiro/aws-cdk-utul/lib/typ
 const stack = new Stack()
 
 // just wrap an original `Template` instance of aws-cdk-lib/assertions
-const template = new TypedTemplate(Template.fromStack(stack))
+const template = TypedTemplate.fromStack(stack)
 // you can execute all method implemented in original `Template` instance
 template.hasResource(AWS_EC2_VPC({Properties: {
   CidrBlock: "10.0.0.0/16"
