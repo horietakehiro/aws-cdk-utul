@@ -27,8 +27,6 @@
 
 ```js
 import { Stack } from "aws-cdk-lib";
-import { Template } from "aws-cdk-lib/assertions";
-
 import { TypedTemplate } from "@horietakehiro/aws-cdk-utul/lib/assertions";
 import { AWS_EC2_SUBNET, AWS_EC2_VPC } from "@horietakehiro/aws-cdk-utul/lib/types/cfn-resource-types";
 const stack = new Stack()
