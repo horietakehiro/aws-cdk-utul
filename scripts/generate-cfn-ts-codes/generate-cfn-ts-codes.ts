@@ -92,7 +92,7 @@ export class ResourceFileGenerator {
   replaceString = ReplaceString
   headerStatement: string = [
     'import { InputResource, InputResourceWithoutType, OutputResource } from "./../typed-resource";',
-    'export type RESOURCE<T> = (resource: InputResourceWithoutType<T>) => InputResource<T>;',
+    'export type RESOURCE<T> = (resource?: InputResourceWithoutType<T>) => InputResource<T>;',
     ""
   ].join("\n")
   importStatement:string = 'import { ___UPPER_RESOURCE_TYPE__ } from "./cfn-resource-types/__KEBAB_RESOURCE_TYPE__";'
