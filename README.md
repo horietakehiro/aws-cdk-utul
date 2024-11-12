@@ -20,7 +20,7 @@
 
 ![type-hinting-1](./docs/type-hinting-1.png)
 
-- You can use by just wrapping AWS CDK's `Template` class.
+<!-- - You can use by just wrapping AWS CDK's `Template` class. -->
 - You can use all methods implemented by AWS CDK's `Template` class with proper type definitions.
 - Return values of some methods - e.g. `findResources` - are changed from original ones, so that succeeding processes can handle and access them more easily.
 - You can still use AWS CDK's `Matcher` class and other arbitrary objects too.
