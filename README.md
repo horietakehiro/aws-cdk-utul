@@ -31,7 +31,6 @@ import { TypedTemplate } from "@horietakehiro/aws-cdk-utul/lib/assertions";
 import { AWS_EC2_SUBNET, AWS_EC2_VPC } from "@horietakehiro/aws-cdk-utul/lib/types/cfn-resource-types";
 const stack = new Stack()
 
-// just wrap an original `Template` instance of aws-cdk-lib/assertions
 const template = TypedTemplate.fromStack(stack)
 // you can execute all method implemented in original `Template` instance
 template.hasResource(AWS_EC2_VPC({Properties: {
