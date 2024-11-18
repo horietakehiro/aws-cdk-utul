@@ -7,22 +7,22 @@ type Primitives =
   | undefined
   | null
   | symbol
-  | bigint;
+  | bigint | string[] | number[] | boolean[] | bigint[];
 /**
  * make properties of `T` asignable Matcher recirsively and other arbitrary json objects for primitive type fields
  */
 type AlsoMatchable<T> = {
   [p in keyof T]?: T[p] extends Primitives
-    ? T[p] | Matcher | { [key in string]: any }
-    : AlsoMatchable<T[p]> | Matcher;
+  ? T[p] | Matcher | { [key in string]: any }
+  : AlsoMatchable<T[p]> | Matcher;
 };
 /**
  * make properties of `T` asignable arbitrary json objects
  */
 type AlsoAny<T> = {
   [p in keyof T]: T[p] extends Primitives
-    ? T[p] | { [key in string]: any }
-    : AlsoAny<T[p]>;
+  ? T[p] | { [key in string]: any }
+  : AlsoAny<T[p]>;
 };
 
 /**
@@ -43,7 +43,7 @@ export interface InputResource<T> extends AlsoMatchable<BaseResource> {
   Type: string;
 }
 export interface InputResourceWithoutType<T>
-  extends Omit<InputResource<T>, "Type"> {}
+  extends Omit<InputResource<T>, "Type"> { }
 export interface OutputResource<T> extends AlsoAny<BaseResource> {
   Properties?: AlsoAny<T>;
   Type: string;
@@ -73,8 +73,8 @@ interface Output {
     Name: any;
   };
 }
-export interface InputOutput extends AlsoMatchable<Output> {}
-export interface OutputOutput extends AlsoAny<Output> {}
+export interface InputOutput extends AlsoMatchable<Output> { }
+export interface OutputOutput extends AlsoAny<Output> { }
 /**
  * interface of cloudformation template parameter
  */
@@ -91,8 +91,8 @@ interface Parameter {
   NoEcho?: boolean;
   Type: string;
 }
-export interface InputParamter extends AlsoMatchable<Parameter> {}
-export interface OutputParameter extends AlsoAny<Parameter> {}
+export interface InputParamter extends AlsoMatchable<Parameter> { }
+export interface OutputParameter extends AlsoAny<Parameter> { }
 
 export type Condition = {
   [key in string]: {
