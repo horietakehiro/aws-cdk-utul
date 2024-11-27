@@ -54,6 +54,12 @@ export class TypedTemplate {
 
   /**
    * same function as `Template.resourceCountIs`
+   * 
+   * use this method like below:
+   * 
+   * ```js
+   * template.resourceCountIs(AWS_EC2_SUBNET, 3)
+   * ```
    * @param type 
    * @param count 
    */
