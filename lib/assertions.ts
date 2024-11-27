@@ -1,8 +1,4 @@
-import {
-  Template,
-  Match,
-  Matcher,
-} from "aws-cdk-lib/assertions";
+import { Template, Match, Matcher } from "aws-cdk-lib/assertions";
 import {
   Condition,
   InputResource,
@@ -13,6 +9,7 @@ import {
   ReturnValue,
   InputOutput,
   OutputOutput,
+  InputResourceWithoutType,
 } from "./typed-resource";
 
 /**
@@ -26,8 +23,8 @@ export class TypedTemplate {
 
   /**
    * same function as `Template.fromStack` but returns `TypedTemplate`
-   * @param args 
-   * @returns 
+   * @param args
+   * @returns
    */
   static fromStack(
     ...args: Parameters<typeof Template.fromStack>
@@ -36,8 +33,8 @@ export class TypedTemplate {
   }
   /**
    * same function as `Template.fromJSON` but returns `TypedTemplate`
-   * @param args 
-   * @returns 
+   * @param args
+   * @returns
    */
   static fromJSON(
     ...args: Parameters<typeof Template.fromJSON>
@@ -46,8 +43,8 @@ export class TypedTemplate {
   }
   /**
    * same function as `Template.fromString` but returns `TypedTemplate`
-   * @param args 
-   * @returns 
+   * @param args
+   * @returns
    */
   static fromString(
     ...args: Parameters<typeof Template.fromString>
@@ -57,38 +54,41 @@ export class TypedTemplate {
 
   /**
    * same function as `Template.resourceCountIs`
-   * @param r 
+   * @param type 
    * @param count 
    */
-  resourceCountIs<T>(r: InputResource<T>, count: number): void {
-    this.template.resourceCountIs(r.Type, count);
+  resourceCountIs<T>(
+    type: (resource?: InputResourceWithoutType<T>) => InputResource<T>,
+    count: number
+  ): void {
+    this.template.resourceCountIs(type().Type, count);
   }
   /**
    * same function as `Template.resourcePropertiesCountIs`
-   * @param r 
-   * @param count 
+   * @param r
+   * @param count
    */
   resourcePropertiesCountIs<T>(r: InputResource<T>, count: number): void {
     this.template.resourcePropertiesCountIs(r.Type, r.Properties, count);
   }
   /**
    * same function as `Template.hasResourceProperties`
-   * @param r 
+   * @param r
    */
   hasResourceProperties<T>(r: InputResource<T>): void {
     this.template.hasResourceProperties(r.Type, r.Properties);
   }
   /**
    * same function as `Template.hasResource`
-   * @param r 
+   * @param r
    */
   hasResource<T>(r: InputResource<T>): void {
     this.template.hasResource(r.Type, r);
   }
   /**
    * same function as `Template.findResources`
-   * @param r 
-   * @returns 
+   * @param r
+   * @returns
    */
   findResources<T>(r: InputResource<T>): ReturnValue<OutputResource<T>>[] {
     const resources = this.template.findResources(r.Type, r) as {
@@ -100,31 +100,31 @@ export class TypedTemplate {
   }
   /**
    * same function as `Template.allResources`
-   * @param r 
+   * @param r
    */
   allResources<T>(r: InputResource<T>): void {
     this.template.allResources(r.Type, r);
   }
   /**
    * same function as `Template.allResourceProperties`
-   * @param r 
+   * @param r
    */
   allResourcesProperties<T>(r: InputResource<T>): void {
     this.template.allResourcesProperties(r.Type, r.Properties);
   }
   /**
    * same function as `Template.hasParameter`
-   * @param logicalId 
-   * @param props 
+   * @param logicalId
+   * @param props
    */
   hasParameter(logicalId: string, props: InputParamter): void {
     this.template.hasParameter(logicalId, props);
   }
   /**
    * same function as `Template.findParameters`
-   * @param logicalId 
-   * @param props 
-   * @returns 
+   * @param logicalId
+   * @param props
+   * @returns
    */
   findParameters(
     logicalId: string,
@@ -137,17 +137,17 @@ export class TypedTemplate {
   }
   /**
    * same function as `Template.hasOutput`
-   * @param logicalId 
-   * @param props 
+   * @param logicalId
+   * @param props
    */
   hasOutput(logicalId: string, props: InputOutput): void {
     this.template.hasOutput(logicalId, props);
   }
   /**
    * same function as `Template.findOutputs`
-   * @param logicalId 
-   * @param props 
-   * @returns 
+   * @param logicalId
+   * @param props
+   * @returns
    */
   findOutputs(
     logicalId: string,
@@ -160,17 +160,17 @@ export class TypedTemplate {
   }
   /**
    * same function as `Template.hasMapping`
-   * @param logicalId 
-   * @param props 
+   * @param logicalId
+   * @param props
    */
   hasMapping(logicalId: string, props: any): void {
     this.template.hasMapping(logicalId, props);
   }
   /**
    * same function as `Template.findMappings`
-   * @param logicalId 
-   * @param props 
-   * @returns 
+   * @param logicalId
+   * @param props
+   * @returns
    */
   findMappings(logicalId: string, props?: any): ReturnValue<Mapping>[] {
     const mappings = this.template.findMappings(logicalId, props);
@@ -180,17 +180,17 @@ export class TypedTemplate {
   }
   /**
    * same function as `Template.hasCondition`
-   * @param logicalId 
-   * @param props 
+   * @param logicalId
+   * @param props
    */
   hasCondition(logicalId: string, props: any): void {
     this.template.hasCondition(logicalId, props);
   }
   /**
    * same function as `Template.findConditions`
-   * @param logicalId 
-   * @param props 
-   * @returns 
+   * @param logicalId
+   * @param props
+   * @returns
    */
   findConditions(logicalId: string, props?: any): ReturnValue<Condition>[] {
     const conditions = this.template.findConditions(logicalId, props);
@@ -206,25 +206,25 @@ export class TypedTemplate {
 export class ExtraMatch extends Match {
   /**
    * same function as `Match.objectEquals({ Ref: logicalId })`
-   * @param logicalId 
-   * @returns 
+   * @param logicalId
+   * @returns
    */
   static ref(logicalId: string): Matcher {
     return Match.objectEquals({ Ref: logicalId });
   }
   /**
    * same function as `Match.objectEquals({"Fn::GetAtt": [logicalId, attribute]})`
-   * @param logicalId 
-   * @param attribute 
-   * @returns 
+   * @param logicalId
+   * @param attribute
+   * @returns
    */
   static getAtt(logicalId: string, attribute: string): Matcher {
-    return Match.objectEquals({"Fn::GetAtt": [logicalId, attribute]});
+    return Match.objectEquals({ "Fn::GetAtt": [logicalId, attribute] });
   }
   /**
    * same function as `Match.objectEquals({"Fn::GetAtt": [logicalId, "Arn"]})`
-   * @param logicalId 
-   * @returns 
+   * @param logicalId
+   * @returns
    */
   static getAttArn(logicalId: string): Matcher {
     return this.getAtt(logicalId, "Arn");

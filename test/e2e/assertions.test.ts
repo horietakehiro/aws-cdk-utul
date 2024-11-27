@@ -17,7 +17,8 @@ const template = TypedTemplate.fromStack(stack);
 describe("TypedTemplate", () => {
   test.skip("fromStack - obviously passed", () => {});
   test("resourceCountIs", () => {
-    template.resourceCountIs(AWS_EC2_SUBNET(), 2);
+    // template.resourceCountIs(AWS_EC2_SUBNET(), 2);
+    template.resourceCountIs(AWS_EC2_SUBNET, 2)
   });
   test("resourcePropertiesCountIs", () => {
     template.resourcePropertiesCountIs(
