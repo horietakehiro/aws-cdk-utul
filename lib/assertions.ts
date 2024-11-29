@@ -21,6 +21,16 @@ export class TypedTemplate {
     this.template = template;
   }
 
+  private get<T>(def: any, array: T[], strict: boolean = true): T {
+    if (array.length === 0) {
+      throw Error(`not found : ${JSON.stringify(def)}`);
+    }
+    if (array.length > 1 && strict) {
+      throw Error(`multiple found : ${JSON.stringify(def)}`);
+    }
+    return array[0];
+  }
+
   /**
    * same function as `Template.fromStack` but returns `TypedTemplate`
    * @param args
@@ -54,14 +64,14 @@ export class TypedTemplate {
 
   /**
    * same function as `Template.resourceCountIs`
-   * 
+   *
    * use this method like below:
-   * 
+   *
    * ```js
    * template.resourceCountIs(AWS_EC2_SUBNET, 3)
    * ```
-   * @param type 
-   * @param count 
+   * @param type
+   * @param count
    */
   resourceCountIs<T>(
     type: (resource?: InputResourceWithoutType<T>) => InputResource<T>,
@@ -141,6 +151,7 @@ export class TypedTemplate {
       return { id: id, def: parameter as OutputParameter };
     });
   }
+
   /**
    * same function as `Template.hasOutput`
    * @param logicalId
@@ -203,6 +214,34 @@ export class TypedTemplate {
     return Object.entries(conditions).map(([id, condition]) => {
       return { id: id, def: condition };
     });
+  }
+
+  /**
+   * return a single resource for specified type and definition.
+   *
+   * - if no resource matched with the specified type and definition, raise Error.
+   * - if multiple resources matched and `strict` is `true`(default), raise Error
+   * - if multiple resources matched and `strict` is `false`, return first item
+   * @param r
+   * @param strict
+   * @returns
+   */
+  getResource<T>(
+    ...args: Parameters<typeof this.findResources<T>>
+  ): ReturnValue<typeof this.findResources<T>> extends (infer U)[] ? U : any {
+    return this.get(args, this.findResources(args[0]));
+  }
+
+  public _get<FN extends (...args: any) => any[]>(fn:FN, args:Parameters<FN>, strict:boolean): ReturnValue<FN> extends (infer U)[] ? U : any {
+    const array = fn(...args)
+    if (array.length === 0) {
+      throw Error(`not found : ${JSON.stringify("")}`);
+    }
+    if (array.length > 1 && strict) {
+      throw Error(`multiple found : ${JSON.stringify("")}`);
+    }
+    return array[0];
+
   }
 }
 
