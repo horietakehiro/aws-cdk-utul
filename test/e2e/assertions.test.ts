@@ -18,7 +18,7 @@ describe("TypedTemplate", () => {
   test.skip("fromStack - obviously passed", () => {});
   test("resourceCountIs", () => {
     // template.resourceCountIs(AWS_EC2_SUBNET(), 2);
-    template.resourceCountIs(AWS_EC2_SUBNET, 2)
+    template.resourceCountIs(AWS_EC2_SUBNET, 2);
   });
   test("resourcePropertiesCountIs", () => {
     template.resourcePropertiesCountIs(
@@ -96,6 +96,36 @@ describe("TypedTemplate", () => {
     const conditions = template.findConditions("*", {});
     expect(conditions.length).toBe(1);
   });
+
+  test("getResource - hit 1 resource - successs", () => {
+    const { id, def } = template.getResource(
+      AWS_EC2_VPC({
+        Properties: {
+          CidrBlock: stackProps.cidr,
+        },
+      })
+    );
+    expect(id).toContain("VPC");
+    expect(def.Properties?.CidrBlock).toBe(stackProps.cidr);
+  });
+  test("getResource - hit 0 resource - fail", () => {
+    const r = AWS_EC2_VPC({
+      Properties: {
+        CidrBlock: "0.0.0.0/0",
+      },
+    });
+    r
+    expect(() => template.getResource(r)).toThrow(
+      `resource not found with definition : ${JSON.stringify(r)}`
+    );
+  });
+  test("getResource - hit 2 resources with strict true(default) - fail", () => {
+    const r = AWS_EC2_SUBNET();
+    expect(() => template.getResource(r)).toThrow(
+      `multiple resource found with definition : ${JSON.stringify(r)}` 
+    );
+  });
+
 });
 
 describe("ExtraMatch", () => {

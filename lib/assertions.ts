@@ -21,6 +21,18 @@ export class TypedTemplate {
     this.template = template;
   }
 
+  private get<T>(type: string, def: any, array: T[]): T {
+    if (array.length === 0) {
+      throw Error(`${type} not found with definition : ${JSON.stringify(def)}`);
+    }
+    if (array.length > 1) {
+      throw Error(
+        `multiple ${type} found with definition : ${JSON.stringify(def)}`
+      );
+    }
+    return array[0];
+  }
+
   /**
    * same function as `Template.fromStack` but returns `TypedTemplate`
    * @param args
@@ -54,14 +66,14 @@ export class TypedTemplate {
 
   /**
    * same function as `Template.resourceCountIs`
-   * 
+   *
    * use this method like below:
-   * 
+   *
    * ```js
    * template.resourceCountIs(AWS_EC2_SUBNET, 3)
    * ```
-   * @param type 
-   * @param count 
+   * @param type
+   * @param count
    */
   resourceCountIs<T>(
     type: (resource?: InputResourceWithoutType<T>) => InputResource<T>,
@@ -141,6 +153,7 @@ export class TypedTemplate {
       return { id: id, def: parameter as OutputParameter };
     });
   }
+
   /**
    * same function as `Template.hasOutput`
    * @param logicalId
@@ -204,6 +217,21 @@ export class TypedTemplate {
       return { id: id, def: condition };
     });
   }
+
+  /**
+   * return a single resource for specified type and definition.
+   *
+   * - if no resource matched with the specified type and definition, raise Error.
+   * - if multiple resources matched, raise Error
+   * @param args 
+   * @returns 
+   */
+  getResource<T>(
+    ...args: Parameters<typeof this.findResources<T>>
+  ): ReturnValue<typeof this.findResources<T>> extends (infer U)[] ? U : any {
+    return this.get("resource", args[0], this.findResources(args[0]));
+  }
+
 }
 
 /**
