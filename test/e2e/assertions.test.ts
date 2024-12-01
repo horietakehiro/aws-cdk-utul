@@ -114,34 +114,18 @@ describe("TypedTemplate", () => {
         CidrBlock: "0.0.0.0/0",
       },
     });
+    r
     expect(() => template.getResource(r)).toThrow(
-      `not found : ${JSON.stringify(r)}`
+      `resource not found with definition : ${JSON.stringify(r)}`
     );
   });
   test("getResource - hit 2 resources with strict true(default) - fail", () => {
     const r = AWS_EC2_SUBNET();
     expect(() => template.getResource(r)).toThrow(
-      `multiple found : ${JSON.stringify(r)}` 
+      `multiple resource found with definition : ${JSON.stringify(r)}` 
     );
   });
-  test("getResource - hit 2 resources with strict false - success", () => {
-    const resounce = template.getResource(AWS_EC2_SUBNET(), false);
-    expect(resounce.id).toContain("Subnet");
-  });
 
-  template._get(template.findResources(AWS_EC2_EIP()), )
-  // test("getParameter", () => {
-  //   fail()
-  // })
-  // test("getOutput", () => {
-  //   fail()
-  // })
-  // test("getMapping", () => {
-  //   fail()
-  // })
-  // test("getCondition", () => {
-  //   fail()
-  // })
 });
 
 describe("ExtraMatch", () => {

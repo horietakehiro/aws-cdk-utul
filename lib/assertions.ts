@@ -21,12 +21,14 @@ export class TypedTemplate {
     this.template = template;
   }
 
-  private get<T>(def: any, array: T[], strict: boolean = true): T {
+  private get<T>(type: string, def: any, array: T[]): T {
     if (array.length === 0) {
-      throw Error(`not found : ${JSON.stringify(def)}`);
+      throw Error(`${type} not found with definition : ${JSON.stringify(def)}`);
     }
-    if (array.length > 1 && strict) {
-      throw Error(`multiple found : ${JSON.stringify(def)}`);
+    if (array.length > 1) {
+      throw Error(
+        `multiple ${type} found with definition : ${JSON.stringify(def)}`
+      );
     }
     return array[0];
   }
@@ -220,29 +222,16 @@ export class TypedTemplate {
    * return a single resource for specified type and definition.
    *
    * - if no resource matched with the specified type and definition, raise Error.
-   * - if multiple resources matched and `strict` is `true`(default), raise Error
-   * - if multiple resources matched and `strict` is `false`, return first item
-   * @param r
-   * @param strict
-   * @returns
+   * - if multiple resources matched, raise Error
+   * @param args 
+   * @returns 
    */
   getResource<T>(
     ...args: Parameters<typeof this.findResources<T>>
   ): ReturnValue<typeof this.findResources<T>> extends (infer U)[] ? U : any {
-    return this.get(args, this.findResources(args[0]));
+    return this.get("resource", args[0], this.findResources(args[0]));
   }
 
-  public _get<FN extends (...args: any) => any[]>(fn:FN, args:Parameters<FN>, strict:boolean): ReturnValue<FN> extends (infer U)[] ? U : any {
-    const array = fn(...args)
-    if (array.length === 0) {
-      throw Error(`not found : ${JSON.stringify("")}`);
-    }
-    if (array.length > 1 && strict) {
-      throw Error(`multiple found : ${JSON.stringify("")}`);
-    }
-    return array[0];
-
-  }
 }
 
 /**
