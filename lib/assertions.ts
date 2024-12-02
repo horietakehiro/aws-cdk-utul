@@ -228,7 +228,7 @@ export class TypedTemplate {
    */
   getResource<T>(
     ...args: Parameters<typeof this.findResources<T>>
-  ): ReturnValue<typeof this.findResources<T>> extends (infer U)[] ? U : any {
+  ): ReturnType<typeof this.findResources<T>> extends (infer U)[] ? U : never {
     return this.get("resource", args[0], this.findResources(args[0]));
   }
 
