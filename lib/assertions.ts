@@ -223,15 +223,14 @@ export class TypedTemplate {
    *
    * - if no resource matched with the specified type and definition, raise Error.
    * - if multiple resources matched, raise Error
-   * @param args 
-   * @returns 
+   * @param args
+   * @returns
    */
   getResource<T>(
     ...args: Parameters<typeof this.findResources<T>>
   ): ReturnType<typeof this.findResources<T>> extends (infer U)[] ? U : never {
     return this.get("resource", args[0], this.findResources(args[0]));
   }
-
 }
 
 /**
@@ -263,4 +262,76 @@ export class ExtraMatch extends Match {
   static getAttArn(logicalId: string): Matcher {
     return this.getAtt(logicalId, "Arn");
   }
+  static regionalArn(elems: ArnElements, delimiter: string = ""): Matcher {
+    return Match.objectEquals({
+      "Fn::Join": Match.arrayEquals([
+        delimiter,
+        Match.arrayWith([
+          "arn:",
+          elems.partition ?? { Ref: "AWS::Partition" },
+          Match.stringLikeRegexp(`:${elems.service ?? "*"}:`),
+          elems.region ?? { Ref: "AWS::Region" },
+          elems.account ?? { Ref: "AWS::AccountId" },
+          ...(elems.rest ?? []),
+        ]),
+      ]),
+    });
+  }
+
+  static globalArn(
+    elems: Omit<ArnElements, "region">,
+    delimiter: string = ""
+  ): Matcher {
+    return Match.objectEquals({
+      "Fn::Join": Match.arrayEquals([
+        delimiter,
+        Match.arrayWith([
+          "arn:",
+          elems.partition ?? { Ref: "AWS::Partition" },
+          Match.stringLikeRegexp(`:${elems.service ?? "*"}::`),
+          elems.account ?? { Ref: "AWS::AccountId" },
+          ...(elems.rest ?? []),
+        ]),
+      ]),
+    });
+  }
+
+  static iamPolicyDocument() {}
+}
+
+type ArnElement = string | Matcher | { [key: string]: any };
+export interface ArnElements {
+  partition?: ArnElement;
+  service?: ArnElement;
+  region?: ArnElement;
+  account?: ArnElement;
+  rest?: ArnElement[];
+}
+
+// type IAMPolicyElement = string | Matcher
+// type IAMPolicyELements = "Sid" | "Effect"
+export interface IAMPolicyDocument {
+  Version?: string;
+  Id?: string;
+  Statement?: IAMPolicyStatement[];
+}
+
+type IAMPolicyPrincipal =
+  | "*"
+  | {
+      [entry in "AWS" | "Federated" | "Service" | "CanonicalUser"]?:
+        | string
+        | string[];
+    };
+
+export interface IAMPolicyStatement {
+  Sid?: string;
+  Effect?: "Allow" | "Effect";
+  Principal?: IAMPolicyPrincipal;
+  NotPrincipal?: IAMPolicyPrincipal;
+  NotAction?: string | string[];
+  Action?: string | string[];
+  Resource?: string | string[];
+  NotResource?: string | string[];
+  Condition?: { [key: string]: any };
 }
