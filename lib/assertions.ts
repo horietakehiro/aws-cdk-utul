@@ -10,6 +10,8 @@ import {
   InputOutput,
   OutputOutput,
   InputResourceWithoutType,
+  IAMPolicyDocument,
+  AlsoMatcher,
 } from "./typed-resource";
 
 /**
@@ -233,6 +235,14 @@ export class TypedTemplate {
   }
 }
 
+
+export interface JoinProps {
+  /**
+   * @default ""
+   */
+  delimiter?: string
+  arrayWith: any[]
+}
 /**
  * provides some syntax sugars for `Match` class at `aws-cdk-lib/assertions`
  */
@@ -262,76 +272,53 @@ export class ExtraMatch extends Match {
   static getAttArn(logicalId: string): Matcher {
     return this.getAtt(logicalId, "Arn");
   }
-  static regionalArn(elems: ArnElements, delimiter: string = ""): Matcher {
-    return Match.objectEquals({
-      "Fn::Join": Match.arrayEquals([
-        delimiter,
-        Match.arrayWith([
-          "arn:",
-          elems.partition ?? { Ref: "AWS::Partition" },
-          Match.stringLikeRegexp(`:${elems.service ?? "*"}:`),
-          elems.region ?? { Ref: "AWS::Region" },
-          elems.account ?? { Ref: "AWS::AccountId" },
-          ...(elems.rest ?? []),
-        ]),
-      ]),
-    });
+
+  static join(props:JoinProps) :Matcher {
+    return Match.objectLike({
+      "Fn::Join": [
+        props.delimiter ?? "",
+        Match.arrayWith(props.arrayWith)
+      ]
+    })
   }
 
-  static globalArn(
-    elems: Omit<ArnElements, "region">,
-    delimiter: string = ""
-  ): Matcher {
-    return Match.objectEquals({
-      "Fn::Join": Match.arrayEquals([
-        delimiter,
-        Match.arrayWith([
-          "arn:",
-          elems.partition ?? { Ref: "AWS::Partition" },
-          Match.stringLikeRegexp(`:${elems.service ?? "*"}::`),
-          elems.account ?? { Ref: "AWS::AccountId" },
-          ...(elems.rest ?? []),
-        ]),
-      ]),
-    });
+
+  // static regionalArn(elems: ArnElements, delimiter: string = ""): Matcher {
+  //   return Match.objectEquals({
+  //     "Fn::Join": Match.arrayEquals([
+  //       delimiter,
+  //       Match.arrayWith([
+  //         "arn:",
+  //         elems.partition ?? { Ref: "AWS::Partition" },
+  //         Match.stringLikeRegexp(`:${elems.service ?? "*"}:`),
+  //         elems.region ?? { Ref: "AWS::Region" },
+  //         elems.account ?? { Ref: "AWS::AccountId" },
+  //         ...(elems.rest ?? []),
+  //       ]),
+  //     ]),
+  //   });
+  // }
+
+  // static globalArn(
+  //   elems: Omit<ArnElements, "region">,
+  //   delimiter: string = ""
+  // ): Matcher {
+  //   return Match.objectEquals({
+  //     "Fn::Join": Match.arrayEquals([
+  //       delimiter,
+  //       Match.arrayWith([
+  //         "arn:",
+  //         elems.partition ?? { Ref: "AWS::Partition" },
+  //         Match.stringLikeRegexp(`:${elems.service ?? "*"}::`),
+  //         elems.account ?? { Ref: "AWS::AccountId" },
+  //         ...(elems.rest ?? []),
+  //       ]),
+  //     ]),
+  //   });
+  // }
+
+  static iamPolicyLike(doc:AlsoMatcher<IAMPolicyDocument>):Matcher {
+    return Match.objectLike(doc)
   }
-
-  static iamPolicyDocument() {}
 }
 
-type ArnElement = string | Matcher | { [key: string]: any };
-export interface ArnElements {
-  partition?: ArnElement;
-  service?: ArnElement;
-  region?: ArnElement;
-  account?: ArnElement;
-  rest?: ArnElement[];
-}
-
-// type IAMPolicyElement = string | Matcher
-// type IAMPolicyELements = "Sid" | "Effect"
-export interface IAMPolicyDocument {
-  Version?: string;
-  Id?: string;
-  Statement?: IAMPolicyStatement[];
-}
-
-type IAMPolicyPrincipal =
-  | "*"
-  | {
-      [entry in "AWS" | "Federated" | "Service" | "CanonicalUser"]?:
-        | string
-        | string[];
-    };
-
-export interface IAMPolicyStatement {
-  Sid?: string;
-  Effect?: "Allow" | "Effect";
-  Principal?: IAMPolicyPrincipal;
-  NotPrincipal?: IAMPolicyPrincipal;
-  NotAction?: string | string[];
-  Action?: string | string[];
-  Resource?: string | string[];
-  NotResource?: string | string[];
-  Condition?: { [key: string]: any };
-}

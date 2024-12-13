@@ -1,14 +1,23 @@
-import { App } from "aws-cdk-lib";
+import {
+  App,
+  aws_s3 as s3,
+  aws_iam as iam,
+  Stack,
+  CfnOutput,
+} from "aws-cdk-lib";
 import { TestStack, TestStackProps } from "./test-stack";
 import { ExtraMatch, TypedTemplate } from "../../lib/assertions";
-import { Match, Template } from "aws-cdk-lib/assertions";
+import { Match, Matcher, Template } from "aws-cdk-lib/assertions";
 import {
   AWS_EC2_VPC,
   AWS_EC2_SUBNET,
   AWS_EC2_INSTANCE,
   AWS_EC2_EIP,
   AWS_IAM_ROLE,
+  AWS_IAM_MANAGEDPOLICY,
+  AWS_S3_BUCKET,
 } from "./../../lib/types/cfn-resource-types";
+import { AlsoMatcher, IAMPolicyDocument } from "../../lib/typed-resource";
 
 const app = new App();
 const stackProps: TestStackProps = { cidr: "10.0.0.0/16" };
@@ -114,7 +123,7 @@ describe("TypedTemplate", () => {
         CidrBlock: "0.0.0.0/0",
       },
     });
-    r
+    r;
     expect(() => template.getResource(r)).toThrow(
       `resource not found with definition : ${JSON.stringify(r)}`
     );
@@ -122,10 +131,9 @@ describe("TypedTemplate", () => {
   test("getResource - hit 2 resources with strict true(default) - fail", () => {
     const r = AWS_EC2_SUBNET();
     expect(() => template.getResource(r)).toThrow(
-      `multiple resource found with definition : ${JSON.stringify(r)}` 
+      `multiple resource found with definition : ${JSON.stringify(r)}`
     );
   });
-
 });
 
 describe("ExtraMatch", () => {
@@ -153,5 +161,142 @@ describe("ExtraMatch", () => {
     template.hasOutput("*", {
       Value: ExtraMatch.getAttArn(roles[0].id),
     });
+  });
+
+  test("join", () => {
+    const stack = new Stack();
+    const bucket = new s3.Bucket(stack, "Bucket");
+    new CfnOutput(stack, "BucketArn", {
+      value: bucket.arnForObjects("*"),
+    });
+    const template = TypedTemplate.fromStack(stack);
+    const { id } = template.getResource(AWS_S3_BUCKET());
+    template.hasOutput("BucketArn", {
+      Value: ExtraMatch.join({
+        delimiter: "",
+        arrayWith: [ExtraMatch.getAttArn(id), "/*"],
+      }),
+    });
+    expect(template.template).toMatchSnapshot();
+  });
+
+  test("iamPolicyLike - policy", () => {
+    const stack = new Stack();
+    const bucket = new s3.Bucket(stack, "Bucket");
+    new iam.ManagedPolicy(stack, "Policy", {
+      statements: [
+        new iam.PolicyStatement({
+          sid: "test",
+          effect: iam.Effect.ALLOW,
+          actions: ["s3:*"],
+          resources: [bucket.bucketArn],
+          conditions: {
+            NotIpAddress: {
+              "aws:SourceIp": ["10.0.0.0/16"],
+            },
+          },
+        }),
+      ],
+    });
+    const template = TypedTemplate.fromStack(stack);
+
+    const documents: AlsoMatcher<IAMPolicyDocument>[] = [
+      {
+        Statement: [
+          {
+            Sid: "test",
+            Action: "s3:*",
+            Resource: ExtraMatch.getAttArn(
+              stack.getLogicalId(bucket.node.defaultChild as s3.CfnBucket)
+            ),
+            Condition: Match.objectLike({
+              NotIpAddress: {
+                "aws:SourceIp": Match.arrayEquals([
+                  Match.stringLikeRegexp("/16"),
+                ]),
+              },
+            }),
+          },
+        ],
+      },
+      {
+        Statement: [
+          {
+            Sid: "test",
+          },
+        ],
+      },
+    ];
+    documents.forEach((doc) => {
+      template.hasResource(
+        AWS_IAM_MANAGEDPOLICY({
+          Properties: {
+            PolicyDocument: ExtraMatch.iamPolicyLike(doc),
+          },
+        })
+      );
+    });
+  });
+  test("iamPolicyLike - NotPolicy", () => {
+    const stack = new Stack();
+    const bucket = new s3.Bucket(stack, "Bucket");
+    new iam.ManagedPolicy(stack, "Policy", {
+      statements: [
+        new iam.PolicyStatement({
+          effect: iam.Effect.DENY,
+          notActions: ["s3:GetObject", "s3:PutObject"],
+          notResources: [bucket.bucketArn, bucket.arnForObjects("*")],
+        }),
+      ],
+    });
+    const template = TypedTemplate.fromStack(stack);
+    const { id } = template.getResource(AWS_S3_BUCKET());
+
+    const documents: AlsoMatcher<IAMPolicyDocument>[] = [
+      {
+        Statement: [
+          {
+            NotAction: ["s3:GetObject", "s3:PutObject"],
+            NotResource: Match.arrayWith([
+              ExtraMatch.getAttArn(id),
+              ExtraMatch.join({
+                arrayWith: [ExtraMatch.getAttArn(id), "/*"],
+              }),
+            ]),
+          },
+        ],
+      },
+    ];
+    documents.forEach((doc) => {
+      template.hasResource(
+        AWS_IAM_MANAGEDPOLICY({
+          Properties: {
+            PolicyDocument: ExtraMatch.iamPolicyLike(doc),
+          },
+        })
+      );
+    });
+  });
+  test("iamPolicyLike - Principal", () => {
+    const stack = new Stack();
+    new iam.Role(stack, "Role", {
+      assumedBy: new iam.ServicePrincipal("ec2.amazonaws.com"),
+    });
+    const template = TypedTemplate.fromStack(stack);
+
+    template.hasResource(
+      AWS_IAM_ROLE({
+        Properties: {
+          AssumeRolePolicyDocument: ExtraMatch.iamPolicyLike({
+            Statement: [
+              {
+                Principal: { Service: "ec2.amazonaws.com" },
+                Action: "sts:AssumeRole",
+              },
+            ],
+          }),
+        },
+      })
+    );
   });
 });

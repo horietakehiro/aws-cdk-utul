@@ -7,22 +7,26 @@ type Primitives =
   | undefined
   | null
   | symbol
-  | bigint | string[] | number[] | boolean[] | bigint[];
+  | bigint
+  | string[]
+  | number[]
+  | boolean[]
+  | bigint[];
 /**
  * make properties of `T` asignable Matcher recirsively and other arbitrary json objects for primitive type fields
  */
-type AlsoMatchable<T> = {
+export type AlsoMatcher<T> = {
   [p in keyof T]?: T[p] extends Primitives
-  ? T[p] | Matcher | { [key in string]: any }
-  : AlsoMatchable<T[p]> | Matcher;
+    ? T[p] | Matcher
+    : AlsoMatcher<T[p]> | Matcher;
 };
 /**
  * make properties of `T` asignable arbitrary json objects
  */
-type AlsoAny<T> = {
+export type AlsoAny<T> = {
   [p in keyof T]: T[p] extends Primitives
-  ? T[p] | { [key in string]: any }
-  : AlsoAny<T[p]>;
+    ? T[p] | { [key in string]: any }
+    : AlsoAny<T[p]>;
 };
 
 /**
@@ -38,12 +42,12 @@ interface BaseResource {
   Condition?: string;
 }
 
-export interface InputResource<T> extends AlsoMatchable<BaseResource> {
-  Properties?: AlsoMatchable<T>;
+export interface InputResource<T> extends AlsoMatcher<BaseResource> {
+  Properties?: AlsoMatcher<T>;
   Type: string;
 }
 export interface InputResourceWithoutType<T>
-  extends Omit<InputResource<T>, "Type"> { }
+  extends Omit<InputResource<T>, "Type"> {}
 export interface OutputResource<T> extends AlsoAny<BaseResource> {
   Properties?: AlsoAny<T>;
   Type: string;
@@ -73,8 +77,8 @@ interface Output {
     Name: any;
   };
 }
-export interface InputOutput extends AlsoMatchable<Output> { }
-export interface OutputOutput extends AlsoAny<Output> { }
+export interface InputOutput extends AlsoMatcher<Output> {}
+export interface OutputOutput extends AlsoAny<Output> {}
 /**
  * interface of cloudformation template parameter
  */
@@ -91,8 +95,8 @@ interface Parameter {
   NoEcho?: boolean;
   Type: string;
 }
-export interface InputParamter extends AlsoMatchable<Parameter> { }
-export interface OutputParameter extends AlsoAny<Parameter> { }
+export interface InputParamter extends AlsoMatcher<Parameter> {}
+export interface OutputParameter extends AlsoAny<Parameter> {}
 
 export type Condition = {
   [key in string]: {
@@ -104,3 +108,37 @@ export type Mapping = {
     [key in string]: any;
   };
 };
+
+export interface IAMPolicyDocument {
+  Version?: string;
+  Id?: string;
+  Statement?: IAMPolicyStatement[];
+}
+
+export type IAMPolicyPrincipal =
+  | "*"
+  | {
+      [entry in "AWS" | "Federated" | "Service" | "CanonicalUser"]?:
+        | string
+        | string[];
+    };
+
+export interface IAMPolicyStatement {
+  Sid?: string;
+  Effect?: "Allow" | "Effect";
+  Principal?: IAMPolicyPrincipal;
+  NotPrincipal?: IAMPolicyPrincipal;
+  NotAction?: string | string[];
+  Action?: string | string[];
+  Resource?: string | string[];
+  NotResource?: string | string[];
+  Condition?: { [key: string]: any };
+}
+
+export interface ArnElements {
+  partition?: string;
+  service?: string;
+  region?: string;
+  account?: string;
+  rest?: string[];
+}
