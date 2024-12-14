@@ -135,10 +135,33 @@ export interface IAMPolicyStatement {
   Condition?: { [key: string]: any };
 }
 
-export interface ArnElements {
-  partition?: string;
-  service?: string;
-  region?: string;
-  account?: string;
-  rest?: string[];
-}
+// /**
+//  * elements of ARN - Amazon Resource Name
+//  * https://docs.aws.amazon.com/IAM/latest/UserGuide/reference-arns.html
+//  */
+// export interface ArnElements {
+//   /**
+//    * @default {Ref: "AWS::Partition"}
+//    */
+//   partition?: string;
+//   /**
+//    * The service namespace that identifies the AWS product
+//    *
+//    * @example ec2
+//    */
+//   service?: string;
+//   /**
+//    * @default {Ref: "AWS::Region"}
+//    */
+//   region?: string;
+//   /**
+//    * @default {Ref: "AWS::AccountId"}
+//    */
+//   account?: string;
+//   /**
+//    * the rest parts of ARN
+//    *
+//    * @example ["log-group:/log-group-name:", "log-stream:log-stream-name"]
+//    */
+//   rest?: string[];
+// }

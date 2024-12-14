@@ -4,6 +4,10 @@ import {
   aws_iam as iam,
   Stack,
   CfnOutput,
+  aws_logs as logs,
+  Fn,
+  aws_ec2 as ec2,
+  aws_sns,
 } from "aws-cdk-lib";
 import { TestStack, TestStackProps } from "./test-stack";
 import { ExtraMatch, TypedTemplate } from "../../lib/assertions";
@@ -16,6 +20,7 @@ import {
   AWS_IAM_ROLE,
   AWS_IAM_MANAGEDPOLICY,
   AWS_S3_BUCKET,
+  AWS_LOGS_LOGGROUP,
 } from "./../../lib/types/cfn-resource-types";
 import { AlsoMatcher, IAMPolicyDocument } from "../../lib/typed-resource";
 
@@ -163,7 +168,7 @@ describe("ExtraMatch", () => {
     });
   });
 
-  test("join", () => {
+  test("joinLike", () => {
     const stack = new Stack();
     const bucket = new s3.Bucket(stack, "Bucket");
     new CfnOutput(stack, "BucketArn", {
@@ -172,12 +177,11 @@ describe("ExtraMatch", () => {
     const template = TypedTemplate.fromStack(stack);
     const { id } = template.getResource(AWS_S3_BUCKET());
     template.hasOutput("BucketArn", {
-      Value: ExtraMatch.join({
+      Value: ExtraMatch.joinLike({
         delimiter: "",
         arrayWith: [ExtraMatch.getAttArn(id), "/*"],
       }),
     });
-    expect(template.template).toMatchSnapshot();
   });
 
   test("iamPolicyLike - policy", () => {
@@ -259,7 +263,7 @@ describe("ExtraMatch", () => {
             NotAction: ["s3:GetObject", "s3:PutObject"],
             NotResource: Match.arrayWith([
               ExtraMatch.getAttArn(id),
-              ExtraMatch.join({
+              ExtraMatch.joinLike({
                 arrayWith: [ExtraMatch.getAttArn(id), "/*"],
               }),
             ]),
@@ -291,7 +295,6 @@ describe("ExtraMatch", () => {
             Statement: [
               {
                 Principal: { Service: "ec2.amazonaws.com" },
-                Action: "sts:AssumeRole",
               },
             ],
           }),

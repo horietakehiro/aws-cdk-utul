@@ -235,13 +235,12 @@ export class TypedTemplate {
   }
 }
 
-
 export interface JoinProps {
   /**
    * @default ""
    */
-  delimiter?: string
-  arrayWith: any[]
+  delimiter?: string;
+  arrayWith: any[];
 }
 /**
  * provides some syntax sugars for `Match` class at `aws-cdk-lib/assertions`
@@ -273,32 +272,51 @@ export class ExtraMatch extends Match {
     return this.getAtt(logicalId, "Arn");
   }
 
-  static join(props:JoinProps) :Matcher {
+  /**
+   * same function as below:
+   * 
+   * ```js
+   * Match.objectLike({
+   *  "Fn::Join": [props.delimiter ?? "", Match.arrayWith(props.arrayWith)],
+    });
+   * ```
+   * @param props 
+   * @returns 
+   */
+  static joinLike(props: JoinProps): Matcher {
     return Match.objectLike({
-      "Fn::Join": [
-        props.delimiter ?? "",
-        Match.arrayWith(props.arrayWith)
-      ]
-    })
+      "Fn::Join": [props.delimiter ?? "", Match.arrayWith(props.arrayWith)],
+    });
   }
 
-
-  // static regionalArn(elems: ArnElements, delimiter: string = ""): Matcher {
+  // /**
+  //  * returns Match instance that matches regional resource ARN like : `arn:aws:logs:ap-northeast-1:123456789012:log-group:/log-group-name:log-stream:log-stream-name`
+  //  * @param elems
+  //  * @returns
+  //  */
+  // static regionalArnLike(elems: AlsoMatcher<ArnElements>): Matcher {
   //   return Match.objectEquals({
-  //     "Fn::Join": Match.arrayEquals([
-  //       delimiter,
+  //     "Fn::Join": Match.arrayWith([
+  //       "",
   //       Match.arrayWith([
   //         "arn:",
   //         elems.partition ?? { Ref: "AWS::Partition" },
   //         Match.stringLikeRegexp(`:${elems.service ?? "*"}:`),
   //         elems.region ?? { Ref: "AWS::Region" },
   //         elems.account ?? { Ref: "AWS::AccountId" },
-  //         ...(elems.rest ?? []),
+  //         ...(elems.rest instanceof Matcher
+  //           ? [elems.rest]
+  //           : (elems.rest ?? [])),
   //       ]),
   //     ]),
   //   });
   // }
 
+  // /**
+  //  * returns Match instance that matches global resource ARN like : `arn:aws:iam::123456789012:role/role-name`
+  //  * @param elems
+  //  * @returns
+  //  */
   // static globalArn(
   //   elems: Omit<ArnElements, "region">,
   //   delimiter: string = ""
@@ -311,14 +329,15 @@ export class ExtraMatch extends Match {
   //         elems.partition ?? { Ref: "AWS::Partition" },
   //         Match.stringLikeRegexp(`:${elems.service ?? "*"}::`),
   //         elems.account ?? { Ref: "AWS::AccountId" },
-  //         ...(elems.rest ?? []),
+  //         ...(elems.rest instanceof Matcher
+  //           ? [elems.rest]
+  //           : (elems.rest ?? [])),
   //       ]),
   //     ]),
   //   });
   // }
 
-  static iamPolicyLike(doc:AlsoMatcher<IAMPolicyDocument>):Matcher {
-    return Match.objectLike(doc)
+  static iamPolicyLike(doc: AlsoMatcher<IAMPolicyDocument>): Matcher {
+    return Match.objectLike(doc);
   }
 }
-
