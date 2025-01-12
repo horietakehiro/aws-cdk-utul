@@ -18,6 +18,7 @@ phases:
   pre_build:
     on-failure: ABORT
     commands:
+      - npm i -g npm@latest
       - npm ci
       - npm install -g ts-node
 
@@ -35,5 +36,5 @@ phases:
       # - git merge -X theirs --allow-unrelated-histories release
       - git push https://${GITHUB_TOKEN}@github.com/horietakehiro/cfn-docgen.git main
       - git push https://${GITHUB_TOKEN}@github.com/horietakehiro/cfn-docgen.git v$(cat package.json | jq -r .version)
-      
+
 
