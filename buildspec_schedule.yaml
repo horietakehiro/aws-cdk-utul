@@ -12,7 +12,7 @@ phases:
   install:
     on-failure: ABORT
     runtime-versions:
-      nodejs: 20.x
+      nodejs: latest
     commands:
       - echo install nodejs
   pre_build:
