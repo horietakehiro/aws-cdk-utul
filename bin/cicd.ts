@@ -205,6 +205,10 @@ export class ScheduleStack extends cdk.Stack {
         branchOrRef: "main",
       }),
       buildSpec: codebuild.BuildSpec.fromSourceFilename("buildspec_schedule.yaml"),
+      environment: {
+        computeType: codebuild.ComputeType.SMALL,
+        buildImage: codebuild.LinuxBuildImage.STANDARD_7_0
+      }
     });
     project.addToRolePolicy(new iam.PolicyStatement({
       effect: iam.Effect.ALLOW,
