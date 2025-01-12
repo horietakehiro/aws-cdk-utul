@@ -206,6 +206,11 @@ export class ScheduleStack extends cdk.Stack {
       }),
       buildSpec: codebuild.BuildSpec.fromSourceFilename("buildspec_schedule.yaml"),
     });
+    project.addToRolePolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: ["ssm:GetParameter"],
+      resources: ["*"]
+    }))
 
     new events.Rule(this, "Schedule", {
       schedule: events.Schedule.cron({
