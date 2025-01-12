@@ -35,7 +35,8 @@ phases:
       - git commit -am "release version $(cat package.json | jq -r .version)"
       - git tag v$(cat package.json | jq -r .version)
       # - git merge -X theirs --allow-unrelated-histories release
-      - git push https://${GITHUB_TOKEN}@github.com/horietakehiro/aws-cdk-utul.git main
-      - git push https://${GITHUB_TOKEN}@github.com/horietakehiro/aws-cdk-utul.git v$(cat package.json | jq -r .version)
+      - git remote set-url origin https://horietakehiro:${GITHUB_TOKEN}@github.com/horietakehiro/aws-cdk-utul.git
+      - git push origin main
+      - git push origin v$(cat package.json | jq -r .version)
 
 
