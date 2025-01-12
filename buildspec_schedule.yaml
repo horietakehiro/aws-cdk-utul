@@ -20,8 +20,8 @@ phases:
     commands:
       - node -v
       - npm -v
-      - npm install
-      - npm install ts-node
+      - npm ci
+      # - npm install ts-node
 
   build:
     on-failure: ABORT
