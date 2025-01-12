@@ -208,7 +208,7 @@ export class ScheduleStack extends cdk.Stack {
     });
     project.addToRolePolicy(new iam.PolicyStatement({
       effect: iam.Effect.ALLOW,
-      actions: ["ssm:GetParameter"],
+      actions: ["ssm:GetParameters"],
       resources: ["*"]
     }))
 
