@@ -18,8 +18,10 @@ phases:
   pre_build:
     on-failure: ABORT
     commands:
+      - node -v
+      - npm -v
       - npm install
-      - npm install -g ts-node
+      - npm install ts-node
 
   build:
     on-failure: ABORT
