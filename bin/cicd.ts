@@ -219,11 +219,11 @@ export class ScheduleStack extends cdk.Stack {
     new events.Rule(this, "Schedule", {
       schedule: events.Schedule.cron({
         minute: "0",
-        hour: "0",
-        // day: "*",
+        hour: "9",
+        day: "*/3",
         month: "*",
         year: "*",
-        weekDay: "MON",
+        weekDay: "?",
       }),
       targets: [
         new targets.CodeBuildProject(project)
