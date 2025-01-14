@@ -9,13 +9,16 @@ import {
 } from "json-schema-to-typescript"
 import * as path from "path"
 
+const log = (msg:any) => console.log(`generate-cfn-ts-codes - INFO - ${msg}`)
+const warn = (msg:any) => console.warn(`generate-cfn-ts-codes - WARN - ${msg}`)
+const error = (msg:any) => console.error(`generate-cfn-ts-codes - ERROR - ${msg}`)
 
 export const download = async (url:string, filepath:string) => {
-  console.log(`download file from ${url} to ${filepath}`)
+  log(`download file from ${url} to ${filepath}`)
   let agent: undefined | HttpsProxyAgent<""> = undefined
   const proxy_url = process.env.https_proxy
   if (proxy_url !== undefined) {
-    console.log(`use proxy ${proxy_url}`)
+    log(`use proxy ${proxy_url}`)
     agent = new HttpsProxyAgent(proxy_url)
   }
   const response = await fetch(url, {
@@ -33,7 +36,7 @@ export const download = async (url:string, filepath:string) => {
 }
 
 export const extractZip = async (zipfile: string, destDir: string) => {
-  console.log(`extract zip file ${zipfile} into ${destDir}`)
+  log(`extract zip file ${zipfile} into ${destDir}`)
   fs.mkdirSync(destDir, {recursive: true})
   await decompress(zipfile, destDir) 
 }
@@ -67,7 +70,7 @@ export class JSON2TSConvertor {
     const tsCode = await compile({...json, handlers: {}}, resourceType, this.option)
     // if generated tsCode meet at least one skip policy, skip saving it as .ts file.  
     if (this.skipPolicies.map(skipPolicy => skipPolicy(tsCode)).some(b => b)) {
-      console.log(`converting from ${jsonFile} to ${tsFile} is skipped`)
+      log(`converting from ${jsonFile} to ${tsFile} is skipped`)
       return
     }
     fs.writeFileSync(tsFile, tsCode)
@@ -141,7 +144,7 @@ export class ResourceFileGenerator {
     const resourceTypeStatements = tsFiles.map((tsFile, i) => {
       const body = fs.readFileSync(tsFile).toString()
       if (body.length === 1) {
-        console.warn(`skip for empty tsFile ${tsFile}`)
+        warn(`skip for empty tsFile ${tsFile}`)
         return
       }
       const kebabResourceType = path.basename(tsFile, ".ts")
@@ -173,23 +176,23 @@ export class DirectoryStructure {
     this.jsonDir = jsonDir
     this.tsDir = tsDir
     this.resourceFile = resourceFile
-    console.log(`json dir : ${this.jsonDir}`)
-    console.log(`ts dir : ${this.tsDir}`)
+    log(`json dir : ${this.jsonDir}`)
+    log(`ts dir : ${this.tsDir}`)
   }
   refresh() {
     [this.jsonDir, this.tsDir].forEach((dir) => {
       fs.rmSync(dir, {force: true, recursive: true})
       fs.mkdirSync(dir, {recursive: true})
-      console.log(`re-created ${dir}`)
+      log(`re-created ${dir}`)
     })
     fs.rmSync(this.resourceFile , {force: true})
     fs.writeFileSync(this.resourceFile, "")
-    console.log(`re-created ${this.resourceFile}`)
+    log(`re-created ${this.resourceFile}`)
   }
 
   listAbsPaths(dir:string, ):string[] {
     const files = fs.readdirSync(dir, ).map(f => path.join(dir, f))
-    console.log(`hit ${files.length} files at ${dir}`)
+    log(`hit ${files.length} files at ${dir}`)
     return files
   }
 
@@ -221,8 +224,8 @@ export const main = async (region:string, url:string) => {
         const tsFile = ds.fromJSONFile2TSFile(jsonFile, ds.tsDir)
         await converter.convert(jsonFile, tsFile)
       } catch (e) {
-        console.warn(`failed to convert ${jsonFile}`)
-        console.warn(e)
+        warn(`failed to convert ${jsonFile}`)
+        warn(e)
       } 
     }))
 
@@ -232,7 +235,7 @@ export const main = async (region:string, url:string) => {
     generator.appendResourceTypeStatements(tsFiles, jsonDirpath)
 
   } catch (e) {
-    console.error(e)
+    error(e)
     throw e
   } 
 
