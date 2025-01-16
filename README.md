@@ -68,6 +68,10 @@ template.hasOutput("VPCARN", {
 })
 ```
 
+`ExtraMatch.iamPolicyLike` method provides schemas for [IAM Policy document](https://docs.aws.amazon.com/ja_jp/IAM/latest/UserGuide/reference_policies_grammar.html) - it's useful when defining tests for `AWS::IAM::Policy` and `AWS::IAM::Role`
+
+![](./docs/iam-policy-like.png)
+
 ---
 
 ## Install
@@ -78,7 +82,14 @@ npm install @horietakehiro/aws-cdk-utul
 
 ---
 
-## Some notes
+## Release policy
+
+This package will be released new version every 3 days, so that catching up updates of AWS CloudFormation resource types and those schemas which will be happened frequently and irregularly.
+
+---
+
+
+## Some other notes
 
 - Schemas of AWS CloudFormation resource types used in this library are based on [those at `us-east-1`](https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/resource-type-schemas.html)
 - Compatible with AWS CDK v2.0.0 or greater.
