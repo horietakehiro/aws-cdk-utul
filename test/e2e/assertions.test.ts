@@ -17,8 +17,7 @@ import {
   AWS_IAM_MANAGEDPOLICY,
   AWS_S3_BUCKET,
 } from "./../../lib/types/cfn-resource-types";
-import { AlsoMatcher, IAMPolicyDocument } from "../../lib/typed-resource";
-import { Tag } from "../../lib/types/cfn-resource-types/aws-ec2-eip";
+import { AlsoMatcher, IAMPolicyDocument, Tag } from "../../lib/typed-resource";
 import { Ebs } from "../../lib/types/cfn-resource-types/aws-ec2-instance";
 const app = new App();
 const stackProps: TestStackProps = { cidr: "10.0.0.0/16" };

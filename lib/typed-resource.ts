@@ -137,6 +137,10 @@ export interface IAMPolicyStatement {
   Condition?: { [key: string]: any };
 }
 
+export interface Tag {
+  Key: string
+  Value: string
+}
 // /**
 //  * elements of ARN - Amazon Resource Name
 //  * https://docs.aws.amazon.com/IAM/latest/UserGuide/reference-arns.html
