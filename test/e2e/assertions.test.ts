@@ -4,14 +4,10 @@ import {
   aws_iam as iam,
   Stack,
   CfnOutput,
-  aws_logs as logs,
-  Fn,
-  aws_ec2 as ec2,
-  aws_sns,
 } from "aws-cdk-lib";
 import { TestStack, TestStackProps } from "./test-stack";
 import { ExtraMatch, TypedTemplate } from "../../lib/assertions";
-import { Match, Matcher, Template } from "aws-cdk-lib/assertions";
+import { Match } from "aws-cdk-lib/assertions";
 import {
   AWS_EC2_VPC,
   AWS_EC2_SUBNET,
@@ -20,10 +16,10 @@ import {
   AWS_IAM_ROLE,
   AWS_IAM_MANAGEDPOLICY,
   AWS_S3_BUCKET,
-  AWS_LOGS_LOGGROUP,
 } from "./../../lib/types/cfn-resource-types";
 import { AlsoMatcher, IAMPolicyDocument } from "../../lib/typed-resource";
-
+import { Tag } from "../../lib/types/cfn-resource-types/aws-ec2-eip";
+import { Ebs } from "../../lib/types/cfn-resource-types/aws-ec2-instance";
 const app = new App();
 const stackProps: TestStackProps = { cidr: "10.0.0.0/16" };
 const stack = new TestStack(app, "TestStack", stackProps);
@@ -166,6 +162,86 @@ describe("ExtraMatch", () => {
     template.hasOutput("*", {
       Value: ExtraMatch.getAttArn(roles[0].id),
     });
+  });
+  test("arrayWith", () => {
+    template.hasResource(
+      AWS_EC2_EIP({
+        Properties: {
+          Tags: ExtraMatch.arrayWith<Tag[]>([
+            {
+              Key: "key2",
+              Value: "val2",
+            },
+          ]),
+        },
+      })
+    );
+  });
+  test("arrayEquals", () => {
+    template.hasResource(
+      AWS_EC2_EIP({
+        Properties: {
+          Tags: ExtraMatch.arrayEquals<Tag[]>([
+            {
+              Key: "key1",
+              Value: "val1",
+            },
+            {
+              Key: "key2",
+              Value: "val2",
+            },
+          ]),
+        },
+      })
+    );
+  });
+  test("objectEquals", () => {
+    template.hasResource(
+      AWS_EC2_EIP({
+        Properties: {
+          Tags: ExtraMatch.arrayWith<Tag[]>([
+            ExtraMatch.objectEquals<Tag>({
+              Key: "key1",
+              Value: "val1",
+            }),
+          ]),
+        },
+      })
+    );
+  });
+  test("objectLike", () => {
+    template.hasResource(
+      AWS_EC2_INSTANCE({
+        Properties: {
+          BlockDeviceMappings: [
+            {
+              DeviceName: "test",
+              Ebs: ExtraMatch.objectLike<Ebs>({
+                VolumeSize: 10,
+              }),
+            },
+          ],
+        },
+      })
+    );
+  });
+  test("exact", () => {
+    template.hasResource(
+      AWS_EC2_INSTANCE({
+        Properties: {
+          InstanceType: ExtraMatch.exact("t2.micro"),
+        },
+      })
+    );
+  });
+  test("not", () => {
+    template.hasResource(
+      AWS_EC2_INSTANCE({
+        Properties: {
+          ImageId: ExtraMatch.not("ami-12345"),
+        },
+      })
+    );
   });
 
   test("joinLike", () => {

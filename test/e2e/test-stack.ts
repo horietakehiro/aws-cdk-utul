@@ -40,8 +40,27 @@ export class TestStack extends cdk.Stack {
       vpc: vpc, vpcSubnets: {subnetType: ec2.SubnetType.PUBLIC},
       machineImage: ec2.MachineImage.latestAmazonLinux2023(),
       instanceType: ec2.InstanceType.of(ec2.InstanceClass.T2, ec2.InstanceSize.MICRO),
+      blockDevices: [
+        {
+          deviceName: "test",
+          volume: {
+            ebsDevice: {
+              volumeSize: 10,
+            }
+          }
+        }
+      ]
     })
-    const eip = new ec2.CfnEIP(this, "EIP", {})
+    const eip = new ec2.CfnEIP(this, "EIP", {
+      tags: [
+        {
+          key: "key1", value: "val1",
+        },
+        {
+          key: "key2", value: "val2"
+        }
+      ]
+    })
 
     const role = new iam.Role(this, "Role", {
       assumedBy: new iam.ServicePrincipal("ec2.amazonaws.com"),

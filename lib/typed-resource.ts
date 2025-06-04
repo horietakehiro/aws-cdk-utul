@@ -12,13 +12,15 @@ type Primitives =
   | number[]
   | boolean[]
   | bigint[];
+
+export type TypedMatcher<T> = Matcher
 /**
  * make properties of `T` asignable Matcher recirsively and other arbitrary json objects for primitive type fields
  */
 export type AlsoMatcher<T> = {
   [p in keyof T]?: T[p] extends Primitives
-    ? T[p] | Matcher
-    : AlsoMatcher<T[p]> | Matcher;
+    ? T[p] | TypedMatcher<T[p]>
+    : AlsoMatcher<T[p]> | TypedMatcher<T[p]>;
 };
 /**
  * make properties of `T` asignable arbitrary json objects

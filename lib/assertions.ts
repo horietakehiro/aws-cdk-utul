@@ -12,6 +12,7 @@ import {
   InputResourceWithoutType,
   IAMPolicyDocument,
   AlsoMatcher,
+  TypedMatcher,
 } from "./typed-resource";
 
 /**
@@ -270,6 +271,31 @@ export class ExtraMatch extends Match {
    */
   static getAttArn(logicalId: string): Matcher {
     return this.getAtt(logicalId, "Arn");
+  }
+
+  static arrayWith<T extends any[]>(pattern: AlsoMatcher<T>): TypedMatcher<T> {
+    return Match.arrayWith(pattern);
+  }
+  static arrayEquals<T extends any[]>(
+    pattern: AlsoMatcher<T>
+  ): TypedMatcher<T> {
+    return Match.arrayEquals(pattern);
+  }
+  static objectLike<T extends { [key: string]: any }>(
+    pattern: AlsoMatcher<T>
+  ): TypedMatcher<T> {
+    return Match.objectLike(pattern) as TypedMatcher<T>;
+  }
+  static objectEquals<T extends { [key: string]: any }>(
+    pattern: AlsoMatcher<T>
+  ): TypedMatcher<T> {
+    return Match.objectEquals(pattern);
+  }
+  static not<T>(pattern: AlsoMatcher<T>): TypedMatcher<T> {
+    return Match.not(pattern);
+  }
+  static exact<T>(pattern: AlsoMatcher<T>): TypedMatcher<T> {
+    return Match.exact(pattern);
   }
 
   /**
