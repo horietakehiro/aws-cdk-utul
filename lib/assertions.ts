@@ -246,7 +246,7 @@ export interface JoinProps {
 /**
  * provides some syntax sugars for `Match` class at `aws-cdk-lib/assertions`
  */
-export class ExtraMatch extends Match {
+export class ExtraMatch {
   /**
    * same function as `Match.objectEquals({ Ref: logicalId })`
    * @param logicalId
@@ -272,32 +272,6 @@ export class ExtraMatch extends Match {
   static getAttArn(logicalId: string): Matcher {
     return this.getAtt(logicalId, "Arn");
   }
-
-  static arrayWith<T extends any[]>(pattern: AlsoMatcher<T>): TypedMatcher<T> {
-    return Match.arrayWith(pattern);
-  }
-  static arrayEquals<T extends any[]>(
-    pattern: AlsoMatcher<T>
-  ): TypedMatcher<T> {
-    return Match.arrayEquals(pattern);
-  }
-  static objectLike<T extends { [key: string]: any }>(
-    pattern: AlsoMatcher<T>
-  ): TypedMatcher<T> {
-    return Match.objectLike(pattern) as TypedMatcher<T>;
-  }
-  static objectEquals<T extends { [key: string]: any }>(
-    pattern: AlsoMatcher<T>
-  ): TypedMatcher<T> {
-    return Match.objectEquals(pattern);
-  }
-  static not<T>(pattern: AlsoMatcher<T>): TypedMatcher<T> {
-    return Match.not(pattern);
-  }
-  static exact<T>(pattern: AlsoMatcher<T>): TypedMatcher<T> {
-    return Match.exact(pattern);
-  }
-
   /**
    * same function as below:
    * 
@@ -366,4 +340,31 @@ export class ExtraMatch extends Match {
   static iamPolicyLike(doc: AlsoMatcher<IAMPolicyDocument>): Matcher {
     return Match.objectLike(doc);
   }
+}
+export class TypedMatch {
+  static arrayWith<T extends any[]>(pattern: AlsoMatcher<T>): TypedMatcher<T> {
+    return Match.arrayWith(pattern) as unknown as TypedMatcher<T>;
+  }
+  static arrayEquals<T extends any[]>(
+    pattern: AlsoMatcher<T>
+  ): TypedMatcher<T> {
+    return Match.arrayEquals(pattern);
+  }
+  static objectLike<T extends { [key: string]: any }>(
+    pattern: AlsoMatcher<T>
+  ): TypedMatcher<T> {
+    return Match.objectLike(pattern);
+  }
+  static objectEquals<T extends { [key: string]: any }>(
+    pattern: AlsoMatcher<T>
+  ): TypedMatcher<T> {
+    return Match.objectEquals(pattern);
+  }
+  static not<T>(pattern: AlsoMatcher<T>): TypedMatcher<T> {
+    return Match.not(pattern);
+  }
+  static exact<T>(pattern: AlsoMatcher<T>): TypedMatcher<T> {
+    return Match.exact(pattern);
+  }
+
 }
