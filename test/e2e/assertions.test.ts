@@ -18,7 +18,12 @@ import {
   AWS_S3_BUCKET,
 } from "./../../lib/types/cfn-resource-types";
 import { AlsoMatcher, IAMPolicyDocument, Tag } from "../../lib/typed-resource";
-import { Ebs } from "../../lib/types/cfn-resource-types/aws-ec2-instance";
+import {
+  BlockDeviceMapping,
+  Ebs,
+  ElasticGpuSpecification,
+  LaunchTemplateSpecification,
+} from "../../lib/types/cfn-resource-types/aws-ec2-instance";
 const app = new App();
 const stackProps: TestStackProps = { cidr: "10.0.0.0/16" };
 const stack = new TestStack(app, "TestStack", stackProps);
@@ -376,5 +381,67 @@ describe("ExtraMatch", () => {
         },
       })
     );
+  });
+  test("complex pattern(something like monkey test)", () => {
+    const resources = template.findResources(
+      AWS_EC2_INSTANCE({
+        Condition: "condition",
+        CreationPolicy: Match.objectEquals({}),
+        DeletionPolicy: ExtraMatch.exact("Delete"),
+        // @ts-expect-error
+        UpdateReplacePolicy: "",
+        // @ts-expect-error
+        DependsOn: ExtraMatch.objectEquals({}),
+        Properties: {
+          CpuOptions: {
+            CoreCount: 1,
+            ThreadsPerCore: 1,
+          },
+          BlockDeviceMappings: ExtraMatch.arrayWith<BlockDeviceMapping[]>([
+            {
+              DeviceName: Match.stringLikeRegexp("device"),
+              NoDevice: {},
+              Ebs: {
+                DeleteOnTermination: ExtraMatch.not(false),
+                Iops: ExtraMatch.exact(100),
+              },
+            },
+            {
+              Ebs: {
+                VolumeSize: Match.absent(),
+              },
+            },
+            ExtraMatch.objectEquals<BlockDeviceMapping>({}),
+            // @ts-expect-error
+            ExtraMatch.objectEquals<Ebs>({}),
+          ]),
+          EbsOptimized: true,
+          ElasticGpuSpecifications: [
+            {
+              Type: "",
+            },
+            ExtraMatch.objectLike<ElasticGpuSpecification>({}),
+          ],
+          HibernationOptions: {
+            Configured: false,
+          },
+          // @ts-expect-error
+          invalidValue: {},
+
+          LaunchTemplate: ExtraMatch.objectEquals<LaunchTemplateSpecification>({
+            LaunchTemplateId: "",
+          }),
+        },
+      }),
+    );
+
+    expect(resources.length).toBe(0)
+    resources.forEach(({def}) => {
+      def.Properties?.BlockDeviceMappings?.forEach((bdm) => {
+        bdm.Ebs?.DeleteOnTermination === false
+        // @ts-expect-error
+        bdm.Ebs?.Iops === "iops"
+      })
+    })
   });
 });
