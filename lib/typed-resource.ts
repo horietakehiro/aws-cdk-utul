@@ -1,4 +1,5 @@
 import { Matcher } from "aws-cdk-lib/assertions";
+import { BlockDeviceMapping } from "./types/cfn-resource-types/aws-autoscaling-launchconfiguration";
 
 type Primitives =
   | string
@@ -13,7 +14,8 @@ type Primitives =
   | boolean[]
   | bigint[];
 
-export type TypedMatcher<T> = Matcher
+export type TypedMatcher<T> = Matcher | T;
+
 /**
  * make properties of `T` asignable Matcher recirsively and other arbitrary json objects for primitive type fields
  */
@@ -138,8 +140,8 @@ export interface IAMPolicyStatement {
 }
 
 export interface Tag {
-  Key: string
-  Value: string
+  Key: string;
+  Value: string;
 }
 // /**
 //  * elements of ARN - Amazon Resource Name
