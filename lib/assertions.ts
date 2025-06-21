@@ -246,7 +246,7 @@ export interface JoinProps {
 /**
  * provides some syntax sugars for `Match` class at `aws-cdk-lib/assertions`
  */
-export class ExtraMatch extends Match {
+export class ExtraMatch {
   /**
    * same function as `Match.objectEquals({ Ref: logicalId })`
    * @param logicalId
@@ -272,32 +272,6 @@ export class ExtraMatch extends Match {
   static getAttArn(logicalId: string): Matcher {
     return this.getAtt(logicalId, "Arn");
   }
-
-  static arrayWith<T extends any[]>(pattern: AlsoMatcher<T>): TypedMatcher<T> {
-    return Match.arrayWith(pattern);
-  }
-  static arrayEquals<T extends any[]>(
-    pattern: AlsoMatcher<T>
-  ): TypedMatcher<T> {
-    return Match.arrayEquals(pattern);
-  }
-  static objectLike<T extends { [key: string]: any }>(
-    pattern: AlsoMatcher<T>
-  ): TypedMatcher<T> {
-    return Match.objectLike(pattern) as TypedMatcher<T>;
-  }
-  static objectEquals<T extends { [key: string]: any }>(
-    pattern: AlsoMatcher<T>
-  ): TypedMatcher<T> {
-    return Match.objectEquals(pattern);
-  }
-  static not<T>(pattern: AlsoMatcher<T>): TypedMatcher<T> {
-    return Match.not(pattern);
-  }
-  static exact<T>(pattern: AlsoMatcher<T>): TypedMatcher<T> {
-    return Match.exact(pattern);
-  }
-
   /**
    * same function as below:
    * 
@@ -315,55 +289,239 @@ export class ExtraMatch extends Match {
     });
   }
 
-  // /**
-  //  * returns Match instance that matches regional resource ARN like : `arn:aws:logs:ap-northeast-1:123456789012:log-group:/log-group-name:log-stream:log-stream-name`
-  //  * @param elems
-  //  * @returns
-  //  */
-  // static regionalArnLike(elems: AlsoMatcher<ArnElements>): Matcher {
-  //   return Match.objectEquals({
-  //     "Fn::Join": Match.arrayWith([
-  //       "",
-  //       Match.arrayWith([
-  //         "arn:",
-  //         elems.partition ?? { Ref: "AWS::Partition" },
-  //         Match.stringLikeRegexp(`:${elems.service ?? "*"}:`),
-  //         elems.region ?? { Ref: "AWS::Region" },
-  //         elems.account ?? { Ref: "AWS::AccountId" },
-  //         ...(elems.rest instanceof Matcher
-  //           ? [elems.rest]
-  //           : (elems.rest ?? [])),
-  //       ]),
-  //     ]),
-  //   });
-  // }
-
-  // /**
-  //  * returns Match instance that matches global resource ARN like : `arn:aws:iam::123456789012:role/role-name`
-  //  * @param elems
-  //  * @returns
-  //  */
-  // static globalArn(
-  //   elems: Omit<ArnElements, "region">,
-  //   delimiter: string = ""
-  // ): Matcher {
-  //   return Match.objectEquals({
-  //     "Fn::Join": Match.arrayEquals([
-  //       delimiter,
-  //       Match.arrayWith([
-  //         "arn:",
-  //         elems.partition ?? { Ref: "AWS::Partition" },
-  //         Match.stringLikeRegexp(`:${elems.service ?? "*"}::`),
-  //         elems.account ?? { Ref: "AWS::AccountId" },
-  //         ...(elems.rest instanceof Matcher
-  //           ? [elems.rest]
-  //           : (elems.rest ?? [])),
-  //       ]),
-  //     ]),
-  //   });
-  // }
-
+  /**
+   You can define Matcher for IAM Policy Document with type hints.
+   ```js
+    template.hasResource(
+      AWS_IAM_ROLE({
+        Properties: {
+          AssumeRolePolicyDocument: ExtraMatch.iamPolicyLike({
+            Statement: [
+              {
+                Principal: { Service: "ec2.amazonaws.com" },
+              },
+            ],
+          }),
+        },
+      })
+    );
+   ```
+   * @param doc 
+   * @returns 
+   */
   static iamPolicyLike(doc: AlsoMatcher<IAMPolicyDocument>): Matcher {
     return Match.objectLike(doc);
+  }
+  /**
+   Same method as `Match.arrayWith` but provides type hints and validate type match 
+   ```js
+    // this is a right code
+    template.hasResource(
+      AWS_EC2_EIP({
+        Properties: {
+          Tags: ExtraMatch.arrayWith<Tag[]>([
+            {
+              Key: "key2",
+              Value: "val2",
+            },
+          ]),
+        },
+      })
+    );
+    // this is a wrong code(type mismatch will be detected and ts-error will be raised)
+    template.hasResource(
+      AWS_EC2_EIP({
+        Properties: {
+          Tags: ExtraMatch.arrayWith<string[]>([
+            "hoge", "fuga"
+          ]),
+        },
+      })
+    );
+   ```
+   * @param pattern 
+   * @returns 
+   */
+  static arrayWith<T extends any[]>(pattern: AlsoMatcher<T>): TypedMatcher<T> {
+    return Match.arrayWith(pattern) as unknown as TypedMatcher<T>;
+  }
+  /**
+   * Same method as `Match.arrayEquals` but provides type hints and validate type match 
+   ```js
+    // this is a right code
+    template.hasResource(
+      AWS_EC2_EIP({
+        Properties: {
+          Tags: ExtraMatch.arrayEquals<Tag[]>([
+            {
+              Key: "key1",
+              Value: "val1",
+            },
+            {
+              Key: "key2",
+              Value: "val2",
+            },
+          ]),
+        },
+      })
+    );
+    // this is a wrong code(type mismatch will be detected and ts-error will be raised)
+    template.hasResource(
+      AWS_EC2_EIP({
+        Properties: {
+          Tags: ExtraMatch.arrayEquals<Tag[]>([
+            {
+              Key: "key1",
+              Value: "val1",
+            },
+            {
+              Key: 100,
+              Value: 200,
+            },
+          ]),
+        },
+      })
+    );
+   ```
+   * @param pattern 
+   * @returns 
+   */
+  static arrayEquals<T extends any[]>(
+    pattern: AlsoMatcher<T>
+  ): TypedMatcher<T> {
+    return Match.arrayEquals(pattern);
+  }
+  /**
+   * Same method as `Match.objectLike` but provides type hints and validate type match 
+   ```js
+   // this is a right code
+    template.hasResource(
+      AWS_EC2_INSTANCE({
+        Properties: {
+          BlockDeviceMappings: [
+            {
+              DeviceName: "test",
+              Ebs: ExtraMatch.objectLike<Ebs>({
+                VolumeSize: 10,
+              }),
+            },
+          ],
+        },
+      })
+    );
+    // this is a wrong code(type mismatch will be detected and ts-error will be raised)
+    template.hasResource(
+      AWS_EC2_INSTANCE({
+        Properties: {
+          BlockDeviceMappings: [
+            {
+              DeviceName: "test",
+              Ebs: ExtraMatch.objectLike<Ebs>({
+                VolumeSize: "10",
+              }),
+            },
+          ],
+        },
+      })
+    );
+   * @param pattern 
+   * @returns 
+   */
+  static objectLike<T extends { [key: string]: any }>(
+    pattern: AlsoMatcher<T>
+  ): TypedMatcher<T> {
+    return Match.objectLike(pattern);
+  }
+  /**
+   * Same method as `Match.objectEquals` but provides type hints and validate type match 
+   ```js
+   // this is a right code
+    template.hasResource(
+      AWS_EC2_EIP({
+        Properties: {
+          // You can nest TypedMatcher(use TypedMatcher inside TypedMatcher)
+          Tags: ExtraMatch.arrayWith<Tag[]>([
+            ExtraMatch.objectEquals<Tag>({
+              Key: "key1",
+              Value: "val1",
+            }),
+          ]),
+        },
+      })
+    );
+    // this is a wrong code(type mismatch will be detected and ts-error will be raised)
+    template.hasResource(
+      AWS_EC2_EIP({
+        Properties: {
+          Tags: ExtraMatch.arrayWith<Tag[]>([
+            ExtraMatch.objectEquals<Tag>({
+              Key: "key1",
+              Value: 100,
+            }),
+          ]),
+        },
+      })
+    );
+   * @param pattern 
+   * @returns 
+   */
+  static objectEquals<T extends { [key: string]: any }>(
+    pattern: AlsoMatcher<T>
+  ): TypedMatcher<T> {
+    return Match.objectEquals(pattern);
+  }
+  /**
+   * Same method as `Match.not` but provides type hints and validate type match 
+   ```js
+    // this is a right code
+    template.hasResource(
+      AWS_EC2_INSTANCE({
+        Properties: {
+          ImageId: ExtraMatch.not("ami-12345"),
+        },
+      })
+    );
+    // this is a wrong code(type mismatch will be detected and ts-error will be raised)
+    template.hasResource(
+      AWS_EC2_INSTANCE({
+        Properties: {
+          ImageId: ExtraMatch.not(100),
+        },
+      })
+    );
+   ```
+   * Same method as `Match.not` but provides type hints and validate type match 
+   * @param pattern 
+   * @returns 
+   */
+  // TODO: why this expression `T extends never ? never : T` is required but this is required
+  static not<T>(pattern: AlsoMatcher<T extends never ? never : T>): TypedMatcher<T> {
+    return Match.not(pattern);
+  }
+  /**
+   * Same method as `Match.exact` but provides type hints and validate type match 
+   ```js
+    // this is a right code
+    template.hasResource(
+      AWS_EC2_INSTANCE({
+        Properties: {
+          InstanceType: ExtraMatch.exact("t2.micro"),
+        },
+      })
+    );
+    // this is a wrong code(type mismatch will be detected and ts-error will be raised)
+    template.hasResource(
+      AWS_EC2_INSTANCE({
+        Properties: {
+          InstanceType: ExtraMatch.exact(false),
+        },
+      })
+    );
+   ```
+   * @param pattern 
+   * @returns 
+   */
+  static exact<T>(pattern: AlsoMatcher<T extends never ? never : T>): TypedMatcher<T> {
+    return Match.exact(pattern);
   }
 }
