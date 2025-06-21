@@ -74,11 +74,39 @@ template.hasOutput("VPCARN", {
 
 ---
 
+`ExtraMatch.{arrayWith,arrayLike,objectLike,objectEquals,not,exact}` are same method as those of `Match` class but additionally provide type hints. These are useful to type-safely use `Matcher`
+
+![](./docs/ExtraMatch-type-hints-right.png)
+
+![](./docs/ExtraMatch-type-hints-wrong.png)
+
+---
+
 ## Install
 
 ```bash
 npm install @horietakehiro/aws-cdk-utul
 ```
+
+By default, you may feel difficult to use this library because import path is too long for type hits to fit in IDE dialog box like below.
+
+![](./docs//default-tsconfig.png)
+
+So I recommend that you add module alias settings in your `tsconfig.json` file like below.
+
+```json
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/cfn-types": ["node_modules/@horietakehiro/aws-cdk-utul/lib/types/cfn-resource-types"],
+      "@/cfn-types/*": ["node_modules/@horietakehiro/aws-cdk-utul/lib/types/cfn-resource-types/*"]
+    }
+  }
+}
+```
+
+![](./docs/customized-tsconfig.png)
 
 ---
 
