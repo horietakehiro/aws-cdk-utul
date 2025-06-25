@@ -1,7 +1,7 @@
 {
   "name": "@horietakehiro/aws-cdk-utul",
   "license": "MIT",
-  "version": "0.40.1",
+  "version": "0.40.2",
   "repository": {
     "type": "git",
     "url": "https://github.com/horietakehiro/aws-cdk-utul"
