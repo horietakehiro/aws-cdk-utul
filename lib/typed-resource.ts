@@ -17,7 +17,7 @@ type Primitives =
 export type TypedMatcher<T> = Matcher | T;
 
 /**
- * make properties of `T` asignable Matcher recirsively and other arbitrary json objects for primitive type fields
+ * make `T` asignable 'TypedMatcher' recirsively
  */
 export type AlsoMatcher<T> = {
   [p in keyof T]?: T[p] extends Primitives
@@ -25,7 +25,7 @@ export type AlsoMatcher<T> = {
     : AlsoMatcher<T[p]> | TypedMatcher<T[p]>;
 };
 /**
- * make properties of `T` asignable arbitrary json objects
+ * make `T` asignable arbitrary json objects
  */
 export type AlsoAny<T> = {
   [p in keyof T]: T[p] extends Primitives
@@ -139,37 +139,10 @@ export interface IAMPolicyStatement {
   Condition?: { [key: string]: any };
 }
 
+/**
+ * Tag type that can be commonly used across almost all cfn resource types
+ */
 export interface Tag {
   Key: string;
-  Value: string;
+  Value?: string;
 }
-// /**
-//  * elements of ARN - Amazon Resource Name
-//  * https://docs.aws.amazon.com/IAM/latest/UserGuide/reference-arns.html
-//  */
-// export interface ArnElements {
-//   /**
-//    * @default {Ref: "AWS::Partition"}
-//    */
-//   partition?: string;
-//   /**
-//    * The service namespace that identifies the AWS product
-//    *
-//    * @example ec2
-//    */
-//   service?: string;
-//   /**
-//    * @default {Ref: "AWS::Region"}
-//    */
-//   region?: string;
-//   /**
-//    * @default {Ref: "AWS::AccountId"}
-//    */
-//   account?: string;
-//   /**
-//    * the rest parts of ARN
-//    *
-//    * @example ["log-group:/log-group-name:", "log-stream:log-stream-name"]
-//    */
-//   rest?: string[];
-// }
