@@ -5,4 +5,4 @@ functional-test:
 e2e-test:
 	npm test -- --roots test/e2e
 generate-cfn-ts-codes:
-	ts-node  ./scripts/generate-cfn-ts-codes/main.ts
+	npx ts-node  ./scripts/generate-cfn-ts-codes/main.ts
